@@ -1,24 +1,29 @@
 'use strict';
-
+/**
+ * E.D.I.T.H. - Enhanced Digital Identity, Trust & Heuristics
+ * Zero-dependency backend (only Node's built-in modules). Run:  node server.js
+ *
+ * Everything lives in memory. Restart the server (or press "Reset demo") to start fresh.
+ */
 const http = require('http');
 const fs = require('fs');
 const path = require('path');
 
 const PORT = process.env.PORT || 3000;
 
-
-const WINDOW_MS = 20000;        
-const SPIKE_FACTOR = 3;         
-const MIN_SPIKE_COUNT = 8;      
-const COOLDOWN_MS = 15000;      
-const RECOVER_AFTER_MS = 20000; 
-const MISBEHAVE_MULT = 8;       
+// ---------- Tunable settings (change these to tune your demo) ----------
+const WINDOW_MS = 20000;        // sliding window used to measure access rate
+const SPIKE_FACTOR = 3;         // rate above (baseline x this) counts as a spike
+const MIN_SPIKE_COUNT = 8;      // ignore tiny windows
+const COOLDOWN_MS = 15000;      // same penalty type applies at most once per this time
+const RECOVER_AFTER_MS = 20000; // quiet time before trust score starts recovering
+const MISBEHAVE_MULT = 8;       // how much faster the bad app accesses data
 const PENALTY = { spike: 15, newPermission: 10, unauthorized: 20, offPurpose: 8 };
-const AUTO_SUSPEND_BELOW = 30; 
+const AUTO_SUSPEND_BELOW = 30; // auto-protect threshold
 const PENALTY_LABEL = { spike: 'Unusual access frequency', newPermission: 'New permission request', unauthorized: 'Unauthorized access attempt', offPurpose: 'Request outside the app\'s purpose' };
 const SENSITIVE = new Set(['contacts', 'location', 'microphone']);
 
-
+// ---------- The three demo apps ----------
 const APP_DEFS = [
   {
     id: 'photoeditor', expected: ['files', 'camera'], name: 'Lumina Photos', purpose: 'Edits and filters your photos', color: '#c2603a', letter: 'L',
@@ -57,22 +62,23 @@ function reset() {
     startedAt: Date.now(),
     misbehaving: false,
     tick: 0, total: 0, blocked: 0,
-    logs: [],   
-    events: [], 
+    logs: [],   // every access attempt
+    events: [], // alerts and permission changes
     apps: APP_DEFS.map((d) => ({
       id: d.id, name: d.name, purpose: d.purpose, color: d.color, letter: d.letter, baseline: d.rate, def: d,
       score: 100, status: 'active',
       perms: Object.fromEntries(d.perms.map((r) => [r, { status: 'granted', uses: 0, recent: [] }])),
-      window: [],          
-      lastPenalty: {},     
+      window: [],          // timestamps of recent access attempts (sliding window)
+      lastPenalty: {},     // penalty type -> time last applied
       lastPenaltyAt: 0,
-      breakdown: [],       
-      acc: 0,              
-      history: [100],      
+      breakdown: [],       // recent penalties: why the score dropped
+      acc: 0,              // simulator accumulator
+      history: [100],      // trust score over time (1 point per second)
     })),
   };
 }
 
+// ---------- Helpers ----------
 const band = (s) => (s >= 80 ? 'safe' : s >= 50 ? 'watch' : 'risky');
 const findApp = (id) => state.apps.find((a) => a.id === id);
 
@@ -81,7 +87,7 @@ function addEvent(kind, app, severity, message) {
   if (state.events.length > 300) state.events.pop();
 }
 
-
+// Apply a penalty, at most once per COOLDOWN_MS for each penalty type.
 function penalize(app, type, severity, message) {
   const now = Date.now();
   if (now - (app.lastPenalty[type] || 0) < COOLDOWN_MS) return;
@@ -93,13 +99,13 @@ function penalize(app, type, severity, message) {
   addEvent('alert', app, severity, `${message} (trust score -${PENALTY[type]})`);
 }
 
-
+// ---------- Core: an app tries to access a resource ----------
 function handleAccess(appId, resource, reason) {
   const app = findApp(appId);
   if (!app) return { error: 'Unknown app' };
   const now = Date.now();
 
-  
+  // Sliding window: drop old timestamps, add this attempt.
   app.window.push(now);
   while (app.window.length && now - app.window[0] > WINDOW_MS) app.window.shift();
 
@@ -115,26 +121,26 @@ function handleAccess(appId, resource, reason) {
     }
     const p = app.perms[resource];
     if (!p) {
-      
+      // Rule 2: app asks for a permission it never had -> create a pending request
       app.perms[resource] = { status: 'pending', uses: 0, recent: [] };
       note = 'Requested a new permission';
       penalize(app, 'newPermission', 'medium', `${app.name} requested new permission: ${resource}`);
     } else if (p.status === 'granted') {
       allowed = true;
     } else if (p.status === 'restricted') {
-      
+      // Restricted = limited to 3 uses per minute
       p.recent = p.recent.filter((t) => now - t < 60000);
       if (p.recent.length < 3) { p.recent.push(now); allowed = true; }
       else note = 'Restricted: rate limit reached';
     } else {
-      
+      // Rule 3: pending or revoked -> unauthorized attempt
       note = p.status === 'pending' ? 'Permission not approved yet' : 'Permission revoked';
       penalize(app, 'unauthorized', 'high', `${app.name} tried to access ${resource} without permission`);
     }
     if (allowed) { app.perms[resource].uses++; app.perms[resource].lastUsed = now; }
     state.total++; if (!allowed) state.blocked++;
 
-    
+    // Rule 1: frequency spike versus the app's normal rate
     const ratePerMin = app.window.length * (60000 / WINDOW_MS);
     if (app.window.length >= MIN_SPIKE_COUNT && ratePerMin > app.baseline * SPIKE_FACTOR) {
       penalize(app, 'spike', 'medium',
@@ -147,14 +153,14 @@ function handleAccess(appId, resource, reason) {
   return { allowed, note };
 }
 
-
+// ---------- Simulator: runs once per second ----------
 function simTick() {
   state.tick++;
   const now = Date.now();
   for (const app of state.apps) {
     const bad = state.misbehaving && app.id === 'fitnesstracker';
 
-    
+    // Normal traffic at the app's baseline rate (deterministic, so the demo is predictable)
     app.acc += ((app.baseline * (bad ? MISBEHAVE_MULT : 1)) / 60) * (0.6 + Math.random() * 0.8); // jitter for realism
     while (app.acc >= 1) {
       app.acc -= 1;
@@ -163,13 +169,13 @@ function simTick() {
       handleAccess(app.id, res, pick(app.def.reasons[res]));
     }
 
-    
+    // Misbehaving app also goes after data it was never given
     if (bad && state.tick % 3 === 0) {
       const targets = ['contacts', 'files', 'microphone'];
       handleAccess(app.id, targets[Math.floor(state.tick / 3) % 3], 'Unspecified');
     }
 
-    
+    // Slow recovery after a quiet period
     if (app.status === 'active' && app.score < 100 &&
         now - app.lastPenaltyAt > RECOVER_AFTER_MS && state.tick % 5 === 0) app.score++;
 
@@ -189,7 +195,7 @@ function autoProtect() {
   }
 }
 
-
+// ---------- Recommendations (computed from current state) ----------
 function recommendations() {
   const now = Date.now();
   const recs = [];
@@ -225,7 +231,7 @@ function recommendations() {
   return recs.sort((a, b) => order[a.severity] - order[b.severity]);
 }
 
-
+// ---------- Access control actions ----------
 const PERM_VALUES = { approve: 'granted', restrict: 'restricted', revoke: 'revoked' };
 
 function setPermission(appId, resource, value) {
@@ -246,7 +252,7 @@ function setStatus(appId, status) {
   return { ok: true };
 }
 
-
+// ---------- Overall device privacy score ----------
 function privacy() {
   const avg = state.apps.reduce((n, a) => n + a.score, 0) / state.apps.length;
   let off = 0, pend = 0;
@@ -263,6 +269,20 @@ function privacy() {
   return { score, band: band(score), headline: bits.length ? 'Needs attention: ' + bits.join(', ') + '.' : 'All apps are behaving as expected.' };
 }
 
+// ---------- Access heatmap data (who accessed what) ----------
+function heatmap() {
+  const h = {};
+  for (const a of state.apps) h[a.id] = {};
+  for (const l of state.logs) {
+    const a = state.apps.find((x) => x.name === l.app);
+    if (!a) continue;
+    const c = h[a.id][l.resource] || (h[a.id][l.resource] = { allowed: 0, denied: 0 });
+    if (l.allowed) c.allowed++; else c.denied++;
+  }
+  return h;
+}
+
+// ---------- Plain-language risk summary ----------
 function riskSummary(a) {
   if (a.status === 'suspended') return 'Suspended. All of its access requests are being blocked.';
   const now = Date.now();
@@ -276,7 +296,7 @@ function riskSummary(a) {
   return `${a.name} ${parts.join(' and ')}.`;
 }
 
-
+// ---------- Audit report export ----------
 function exportReport(format) {
   const rows = [
     ...state.logs.map((l) => ({ time: l.ts, type: 'access', app: l.app, detail: `${l.resource}: ${l.reason}`, result: l.allowed ? 'allowed' : 'denied' + (l.note ? ' (' + l.note + ')' : '') })),
@@ -287,12 +307,13 @@ function exportReport(format) {
   return { type: 'text/csv', body: 'time,type,app,detail,result\n' + rows.map((r) => [r.time, r.type, r.app, r.detail, r.result].map(q).join(',')).join('\n'), ext: 'csv' };
 }
 
-
+// ---------- API snapshot for the dashboard ----------
 function snapshot() {
   return {
     misbehaving: state.misbehaving,
     autoProtect: state.autoProtect,
     privacy: privacy(),
+    heat: heatmap(),
     target: findApp('fitnesstracker').name,
     summary: {
       monitored: state.apps.length,

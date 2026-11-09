@@ -7,7 +7,6 @@ E.D.I.T.H. is a smart permission manager. It watches how apps use your data **co
 - Team: `Ad Astra`
 
 
-
 ---
 
 ## How to open the project (3 steps, about 1 minute)
@@ -34,7 +33,8 @@ That's it. The apps start generating simulated activity right away. To stop the 
 
 ---
 
-## Quick tour for judges (about 2 minutes)
+
+
 
 1. **Overview.** Five simulated apps, all behaving normally. The *device privacy score* starts at 96 because one app (Notable) holds a location permission that does not fit its purpose.
 2. Click **Revoke location** under *Recommended changes*. The score rises to 100.
@@ -83,6 +83,7 @@ The apps and their activity are **simulated**, as the problem statement asks. Th
     server.js          Backend: state, access control, detection rules, trust score, simulator, API
     public/index.html  Dashboard (plain HTML, CSS and JavaScript, no build step)
     package.json       Project info (no dependencies)
+    netlify/index.html Static build for hosting (engine runs in the browser)
     README.md          This file
 
 ## Troubleshooting
@@ -96,6 +97,3 @@ The apps and their activity are **simulated**, as the problem statement asks. Th
 - **Blank page or "Server not reachable" in the sidebar:** the server is not running. Start it again with `node server.js`.
 - **Nothing happens when opening `index.html` directly:** the dashboard must be opened through the server at `http://localhost:3000`, not by double-clicking the HTML file.
 
-## Tuning (optional)
-
-The constants at the top of `server.js` control the penalties, the detection window, the cooldown, how fast the bad app misbehaves, and the auto-protect threshold.
