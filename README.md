@@ -4,9 +4,9 @@ NITSHACKS 9.0 | Software Track | Problem Statement 2
 
 E.D.I.T.H. is a smart permission manager. It watches how apps use your data **continuously** (not just at install time), gives each app a trust score, explains the score in plain language, recommends permission changes, and lets you act on them straight away.
 
-- Team: `<team name and members>`
-- Demo video: `<link>`
-- Presentation: `<link>`
+- Team: `Ad Astra`
+
+
 
 ---
 
