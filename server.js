@@ -1,29 +1,25 @@
 'use strict';
-/**
- * E.D.I.T.H. - Enhanced Digital Identity, Trust & Heuristics
- * Zero-dependency backend (only Node's built-in modules). Run:  node server.js
- *
- * Everything lives in memory. Restart the server (or press "Reset demo") to start fresh.
- */
+
 const http = require('http');
 const fs = require('fs');
 const path = require('path');
 
 const PORT = process.env.PORT || 3000;
 
-// ---------- Tunable settings (change these to tune your demo) ----------
-const WINDOW_MS = 20000;        // sliding window used to measure access rate
-const SPIKE_FACTOR = 3;         // rate above (baseline x this) counts as a spike
-const MIN_SPIKE_COUNT = 8;      // ignore tiny windows
-const COOLDOWN_MS = 15000;      // same penalty type applies at most once per this time
-const RECOVER_AFTER_MS = 20000; // quiet time before trust score starts recovering
-const MISBEHAVE_MULT = 8;       // how much faster the bad app accesses data
+
+
+const WINDOW_MS = 20000;        
+const SPIKE_FACTOR = 3;         
+const MIN_SPIKE_COUNT = 8;      
+const COOLDOWN_MS = 15000;      
+const RECOVER_AFTER_MS = 20000; 
+const MISBEHAVE_MULT = 8;       
 const PENALTY = { spike: 15, newPermission: 10, unauthorized: 20, offPurpose: 8 };
 const AUTO_SUSPEND_BELOW = 30; // auto-protect threshold
 const PENALTY_LABEL = { spike: 'Unusual access frequency', newPermission: 'New permission request', unauthorized: 'Unauthorized access attempt', offPurpose: 'Request outside the app\'s purpose' };
 const SENSITIVE = new Set(['contacts', 'location', 'microphone']);
 
-// ---------- The three demo apps ----------
+
 const APP_DEFS = [
   {
     id: 'photoeditor', expected: ['files', 'camera'], name: 'Lumina Photos', purpose: 'Edits and filters your photos', color: '#c2603a', letter: 'L',
@@ -78,7 +74,7 @@ function reset() {
   };
 }
 
-// ---------- Helpers ----------
+
 const band = (s) => (s >= 80 ? 'safe' : s >= 50 ? 'watch' : 'risky');
 const findApp = (id) => state.apps.find((a) => a.id === id);
 
@@ -87,7 +83,7 @@ function addEvent(kind, app, severity, message) {
   if (state.events.length > 300) state.events.pop();
 }
 
-// Apply a penalty, at most once per COOLDOWN_MS for each penalty type.
+
 function penalize(app, type, severity, message) {
   const now = Date.now();
   if (now - (app.lastPenalty[type] || 0) < COOLDOWN_MS) return;
@@ -99,7 +95,7 @@ function penalize(app, type, severity, message) {
   addEvent('alert', app, severity, `${message} (trust score -${PENALTY[type]})`);
 }
 
-// ---------- Core: an app tries to access a resource ----------
+
 function handleAccess(appId, resource, reason) {
   const app = findApp(appId);
   if (!app) return { error: 'Unknown app' };
@@ -140,7 +136,7 @@ function handleAccess(appId, resource, reason) {
     if (allowed) { app.perms[resource].uses++; app.perms[resource].lastUsed = now; }
     state.total++; if (!allowed) state.blocked++;
 
-    // Rule 1: frequency spike versus the app's normal rate
+
     const ratePerMin = app.window.length * (60000 / WINDOW_MS);
     if (app.window.length >= MIN_SPIKE_COUNT && ratePerMin > app.baseline * SPIKE_FACTOR) {
       penalize(app, 'spike', 'medium',
@@ -153,7 +149,7 @@ function handleAccess(appId, resource, reason) {
   return { allowed, note };
 }
 
-// ---------- Simulator: runs once per second ----------
+
 function simTick() {
   state.tick++;
   const now = Date.now();
@@ -169,7 +165,6 @@ function simTick() {
       handleAccess(app.id, res, pick(app.def.reasons[res]));
     }
 
-    // Misbehaving app also goes after data it was never given
     if (bad && state.tick % 3 === 0) {
       const targets = ['contacts', 'files', 'microphone'];
       handleAccess(app.id, targets[Math.floor(state.tick / 3) % 3], 'Unspecified');
@@ -195,7 +190,6 @@ function autoProtect() {
   }
 }
 
-// ---------- Recommendations (computed from current state) ----------
 function recommendations() {
   const now = Date.now();
   const recs = [];
@@ -231,7 +225,7 @@ function recommendations() {
   return recs.sort((a, b) => order[a.severity] - order[b.severity]);
 }
 
-// ---------- Access control actions ----------
+
 const PERM_VALUES = { approve: 'granted', restrict: 'restricted', revoke: 'revoked' };
 
 function setPermission(appId, resource, value) {
@@ -252,7 +246,7 @@ function setStatus(appId, status) {
   return { ok: true };
 }
 
-// ---------- Overall device privacy score ----------
+
 function privacy() {
   const avg = state.apps.reduce((n, a) => n + a.score, 0) / state.apps.length;
   let off = 0, pend = 0;
@@ -269,7 +263,6 @@ function privacy() {
   return { score, band: band(score), headline: bits.length ? 'Needs attention: ' + bits.join(', ') + '.' : 'All apps are behaving as expected.' };
 }
 
-// ---------- Access heatmap data (who accessed what) ----------
 function heatmap() {
   const h = {};
   for (const a of state.apps) h[a.id] = {};
@@ -282,7 +275,7 @@ function heatmap() {
   return h;
 }
 
-// ---------- Plain-language risk summary ----------
+
 function riskSummary(a) {
   if (a.status === 'suspended') return 'Suspended. All of its access requests are being blocked.';
   const now = Date.now();
@@ -296,7 +289,7 @@ function riskSummary(a) {
   return `${a.name} ${parts.join(' and ')}.`;
 }
 
-// ---------- Audit report export ----------
+
 function exportReport(format) {
   const rows = [
     ...state.logs.map((l) => ({ time: l.ts, type: 'access', app: l.app, detail: `${l.resource}: ${l.reason}`, result: l.allowed ? 'allowed' : 'denied' + (l.note ? ' (' + l.note + ')' : '') })),
@@ -307,7 +300,7 @@ function exportReport(format) {
   return { type: 'text/csv', body: 'time,type,app,detail,result\n' + rows.map((r) => [r.time, r.type, r.app, r.detail, r.result].map(q).join(',')).join('\n'), ext: 'csv' };
 }
 
-// ---------- API snapshot for the dashboard ----------
+
 function snapshot() {
   return {
     misbehaving: state.misbehaving,
@@ -334,7 +327,7 @@ function snapshot() {
   };
 }
 
-// ---------- Tiny HTTP server ----------
+
 function send(res, code, data, type = 'application/json') {
   res.writeHead(code, { 'Content-Type': type });
   res.end(type === 'application/json' ? JSON.stringify(data) : data);
@@ -370,7 +363,7 @@ const server = http.createServer(async (req, res) => {
   }
 
   if (req.method === 'GET' && (url === '/' || url === '/index.html')) {
-    return fs.readFile(path.join(__dirname, 'public', 'index.html'), (err, data) =>
+    return fs.readFile(path.join(__dirname, 'index.html'), (err, data) =>
       err ? send(res, 500, 'Could not load dashboard', 'text/plain') : send(res, 200, data, 'text/html; charset=utf-8'));
   }
   send(res, 404, 'Not found', 'text/plain');
