@@ -1,0 +1,1219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>E.D.I.T.H. Permission Monitor</title>
+<style>
+:root {
+  --bg: #101820;
+  --panel: #212e37;
+  --panel-hover: #202f3a;
+  --ink: #e7edf1;
+  --muted: #98a8b3;
+  --line: #30414d;
+  --side: #121d26;
+
+  --safe: #45b995;
+  --watch: #e3ad59;
+  --risky: #df7777;
+  --info: #79a9d5;
+
+  --serif: Georgia, "Times New Roman", serif;
+  --sans: Inter, -apple-system, BlinkMacSystemFont,
+          "Segoe UI", Roboto, Arial, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font: 14px/1.55 var(--sans);
+}
+
+h1, h2, h3, p {
+  margin: 0;
+}
+
+button, .btn {
+  font: inherit;
+  cursor: pointer;
+  border: 1px solid var(--line);
+  background: var(--panel);
+  color: var(--ink);
+  padding: 7px 13px;
+  border-radius: 7px;
+  text-decoration: none;
+  display: inline-block;
+  transition: background .18s, border-color .18s;
+}
+
+button:hover, .btn:hover {
+  background: var(--panel-hover);
+  border-color: #607481;
+}
+
+button:focus-visible, .btn:focus-visible {
+  outline: 2px solid var(--info);
+  outline-offset: 3px;
+}
+
+.primary {
+  background: #286e61;
+  color: white;
+  border-color: #286e61;
+}
+
+.primary:hover {
+  background: #328575;
+}
+
+.danger {
+  background: #923f43;
+  color: white;
+  border-color: #923f43;
+}
+
+.danger:hover {
+  background: #aa4e52;
+}
+
+.small {
+  padding: 4px 10px;
+  font-size: 12px;
+}
+
+/* Main layout */
+
+.shell {
+  display: grid;
+  grid-template-columns: 225px minmax(0, 1fr);
+  min-height: 100vh;
+}
+
+.side {
+  background: var(--side);
+  color: #c6d1d8;
+  padding: 25px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  border-right: 1px solid #263640;
+}
+
+.brand {
+  display: flex;
+  gap: 11px;
+  align-items: center;
+  padding: 0 7px;
+}
+
+.brand b {
+  display: block;
+  color: #f1f5f7;
+  font-family: var(--sans);
+  font-size: 20px;
+  font-weight: 650;
+  letter-spacing: .04em;
+}
+
+.brand span {
+  font-size: 11px;
+  color: #899da9;
+  letter-spacing: .04em;
+}
+
+nav {
+  display: grid;
+  gap: 5px;
+}
+
+nav button {
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 7px;
+  color: #a9b8c2;
+  text-align: left;
+  padding: 11px 13px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+nav button:hover {
+  background: #1d2b35;
+}
+
+nav button.on {
+  background: #263943;
+  color: #f3f7f8;
+  border-color: #354b56;
+  border-left: 3px solid #55bba0;
+}
+
+.pill {
+  background: #a94f52;
+  color: white;
+  border-radius: 10px;
+  font-size: 11px;
+  font-style: normal;
+  padding: 0 7px;
+  min-width: 20px;
+  text-align: center;
+}
+
+.demo {
+  margin-top: auto;
+  display: grid;
+  gap: 9px;
+  border-top: 1px solid #2b3a44;
+  padding-top: 17px;
+}
+
+.demo p {
+  font-size: 11px;
+  color: #8296a2;
+  text-transform: uppercase;
+  letter-spacing: .1em;
+}
+
+.demo button {
+  background: #1c2a34;
+  color: #dce5e9;
+  border-color: #344650;
+  text-align: left;
+}
+
+.demo button.danger {
+  background: #923f43;
+  border-color: #923f43;
+  color: white;
+}
+
+.live {
+  font-size: 12px;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  color: #9aabb5;
+  margin-top: 4px;
+}
+
+.live i {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--safe);
+}
+
+.live.off i {
+  background: var(--risky);
+}
+
+/* Main content */
+
+main {
+  padding: 32px 38px 55px;
+  display: grid;
+  gap: 23px;
+  align-content: start;
+  min-width: 0;
+  max-width: 1700px;
+  width: 100%;
+  margin: auto;
+}
+
+header {
+  padding-bottom: 5px;
+}
+
+header h1 {
+  font-family: var(--sans);
+  font-size: 27px;
+  font-weight: 620;
+  letter-spacing: -.6px;
+}
+
+header p {
+  color: var(--muted);
+  font-size: 13px;
+  margin-top: 4px;
+}
+
+.tab {
+  display: grid;
+  gap: 19px;
+}
+
+.tab[hidden] {
+  display: none;
+}
+
+/* Panels and cards */
+
+.panel {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 20px 21px;
+}
+
+.panel > h2 {
+  font-size: 15px;
+  font-weight: 620;
+  margin-bottom: 13px;
+}
+
+.two {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr;
+  gap: 19px;
+}
+
+.summary {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 13px;
+}
+
+.stat {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  padding: 17px 18px;
+}
+
+.stat b {
+  display: block;
+  font-size: 29px;
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: -.7px;
+}
+
+.stat span {
+  color: var(--muted);
+  font-size: 12px;
+  display: block;
+  margin-top: 5px;
+}
+
+.stat.bad b {
+  color: var(--risky);
+}
+
+
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(285px, 1fr));
+  gap: 15px;
+}
+
+.app {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-top: 3px solid var(--safe);
+  border-radius: 9px;
+  padding: 17px;
+  display: grid;
+  gap: 12px;
+  align-content: start;
+  transition: border-color .2s, background .2s;
+}
+
+.app:hover {
+  background: #1c2b35;
+  border-color: #465965;
+}
+
+.app.watch {
+  border-top-color: var(--watch);
+}
+
+.app.risky {
+  border-top-color: var(--risky);
+}
+
+.app.suspended {
+  opacity: .62;
+}
+
+.top {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.top .nm {
+  flex: 1;
+  min-width: 0;
+}
+
+.top h3 {
+  font-size: 15px;
+  font-weight: 620;
+}
+
+.purpose {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.icon {
+  width: 37px;
+  height: 37px;
+  border-radius: 8px;
+  color: #fff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 650;
+  flex: none;
+}
+
+.icon.sm {
+  width: 31px;
+  height: 31px;
+  font-size: 13px;
+}
+
+.ring {
+  width: 84px;
+  height: 84px;
+  flex: none;
+}
+
+.trk {
+  fill: none;
+  stroke: #344650;
+  stroke-width: 8;
+}
+
+.val {
+  fill: none;
+  stroke-width: 8;
+  stroke-linecap: round;
+  transition: stroke-dasharray .5s;
+}
+
+.val.safe {
+  stroke: var(--safe);
+}
+
+.val.watch {
+  stroke: var(--watch);
+}
+
+.val.risky {
+  stroke: var(--risky);
+}
+
+.ring text {
+  font-family: var(--sans);
+  font-size: 24px;
+  font-weight: 600;
+  fill: var(--ink);
+}
+
+.chips {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.chip {
+  font-size: 11px;
+  padding: 3px 8px;
+  border-radius: 5px;
+  border: 1px solid #394b56;
+  background: #202f39;
+  color: #cbd6dc;
+}
+
+.chip.granted {
+  border-color: #397d68;
+  color: #79c7a9;
+  background: #1c3833;
+}
+
+.chip.restricted {
+  border-color: #806638;
+  color: #e3bb75;
+  background: #383125;
+}
+
+.chip.pending {
+  border-color: #496c8b;
+  color: #9fc4e4;
+  background: #243646;
+}
+
+.chip.revoked {
+  border-color: #875052;
+  color: #df9999;
+  background: #39282c;
+  text-decoration: line-through;
+}
+
+.why {
+  font-size: 13px;
+  color: #d0d9de;
+}
+
+.bd {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.bd li {
+  padding: 5px 0;
+  border-top: 1px solid #2d3d47;
+}
+
+.bd li:first-child {
+  border-top: 0;
+}
+
+.bd b {
+  color: var(--risky);
+  margin-right: 5px;
+}
+
+.foot {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.band {
+  font-weight: 600;
+  font-size: 12px;
+}
+
+.band.safe, .safe small {
+  color: var(--safe);
+}
+
+.band.watch, .watch small {
+  color: var(--watch);
+}
+
+.band.risky, .risky small {
+  color: var(--risky);
+}
+
+
+
+#chart svg {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+#chart svg text {
+  fill: #9aabb5 !important;
+}
+
+#chart svg line {
+  stroke: #354650 !important;
+}
+
+.legend {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 9px;
+}
+
+.legend span::before {
+  content: "";
+  display: inline-block;
+  width: 14px;
+  height: 3px;
+  margin-right: 6px;
+  vertical-align: middle;
+  background: var(--c);
+}
+
+.rec {
+  padding: 12px 0;
+  border-top: 1px solid var(--line);
+}
+
+.rec:first-of-type {
+  border-top: 0;
+}
+
+.rec p {
+  margin-bottom: 9px;
+  font-size: 13px;
+}
+
+.sev {
+  font-size: 11px;
+  font-weight: 650;
+  margin-right: 7px;
+}
+
+.sev.high {
+  color: var(--risky);
+}
+
+.sev.medium {
+  color: var(--watch);
+}
+
+.sev.low {
+  color: var(--muted);
+}
+
+.sev.info {
+  color: var(--info);
+}
+
+/* Activity */
+
+.feed {
+  max-height: 420px;
+  overflow: auto;
+  font-size: 12px;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: 65px 1fr;
+  gap: 9px;
+  padding: 9px 0;
+  border-top: 1px solid #2e3e48;
+}
+
+.row:first-child {
+  border-top: 0;
+}
+
+.row time {
+  color: #92a4ae;
+  font-variant-numeric: tabular-nums;
+}
+
+.row.denied {
+  color: #e58d8d;
+}
+
+.row small {
+  color: var(--muted);
+  display: block;
+  margin-top: 3px;
+}
+
+.empty {
+  color: var(--muted);
+  padding: 10px 0;
+}
+
+
+
+.pm {
+  display: grid;
+  grid-template-columns: 245px 1fr;
+  gap: 19px;
+  align-items: start;
+}
+
+.pmlist {
+  display: grid;
+  gap: 7px;
+}
+
+.pmitem {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  text-align: left;
+  padding: 11px;
+  border-radius: 8px;
+  background: var(--panel);
+}
+
+.pmitem.on {
+  border-color: #598477;
+  box-shadow: inset 3px 0 0 #55b99e;
+  background: #20323a;
+}
+
+.pmitem .nm {
+  flex: 1;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.pmitem small {
+  display: block;
+  font-weight: 400;
+  margin-top: 3px;
+}
+
+.dhead {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 14px;
+}
+
+.dhead .nm {
+  flex: 1;
+}
+
+.dhead h2 {
+  font-size: 18px;
+}
+
+.banner {
+  background: #39282c;
+  border: 1px solid #875052;
+  color: #e6aaaa;
+  border-radius: 7px;
+  padding: 10px 12px;
+  margin-bottom: 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+}
+
+.prow {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 12px;
+  align-items: center;
+  padding: 13px 10px;
+  border-top: 1px solid var(--line);
+}
+
+.prow.pending {
+  background: #233644;
+  border-radius: 7px;
+}
+
+.pname b {
+  text-transform: capitalize;
+}
+
+.pname .sub {
+  display: block;
+  color: var(--muted);
+  font-size: 11px;
+  margin-top: 3px;
+}
+
+.sens {
+  color: var(--risky);
+  font-size: 10px;
+  margin-left: 6px;
+}
+
+.seg {
+  display: inline-flex;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  overflow: hidden;
+  background: #202e38;
+}
+
+.seg button {
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: #aab8c1;
+  padding: 6px 12px;
+  font-size: 11px;
+}
+
+.seg button + button {
+  border-left: 1px solid var(--line);
+}
+
+.seg button:hover {
+  background: #344650;
+}
+
+.seg .on {
+  color: white;
+}
+
+.seg .on.allow {
+  background: #28755f;
+}
+
+.seg .on.limit {
+  background: #8b6830;
+}
+
+.seg .on.block {
+  background: #91464a;
+}
+
+.hist {
+  margin-top: 17px;
+  font-size: 12px;
+}
+
+.hist h3 {
+  font-size: 13px;
+  margin-bottom: 7px;
+}
+
+/* Privacy score hero */
+
+.hero {
+  display: flex;
+  gap: 23px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.ring.big {
+  width: 112px;
+  height: 112px;
+}
+
+.hmain {
+  flex: 1;
+  min-width: 240px;
+}
+
+.hmain h2 {
+  font-size: 17px;
+  font-weight: 620;
+}
+
+.hl {
+  font-size: 15px;
+  margin: 4px 0;
+}
+
+.hmain .muted {
+  color: var(--muted);
+  font-size: 12px;
+  max-width: 480px;
+}
+
+.auto {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  max-width: 330px;
+}
+
+.auto span {
+  display: block;
+  color: var(--muted);
+  font-size: 11px;
+  margin-top: 3px;
+}
+
+.switch {
+  width: 44px;
+  height: 25px;
+  padding: 2px;
+  border-radius: 14px;
+  background: #56636c;
+  border: 0;
+  position: relative;
+  flex: none;
+}
+
+.switch i {
+  display: block;
+  width: 21px;
+  height: 21px;
+  border-radius: 50%;
+  background: #edf2f4;
+  transition: transform .2s;
+}
+
+.switch[aria-checked="true"] {
+  background: #368c75;
+}
+
+.switch[aria-checked="true"] i {
+  transform: translateX(19px);
+}
+
+.chip.off {
+  box-shadow: inset 0 -2px 0 var(--watch);
+}
+
+
+
+.toolbar {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+#toasts {
+  position: fixed;
+  right: 18px;
+  bottom: 18px;
+  display: grid;
+  gap: 10px;
+  z-index: 10;
+  max-width: 360px;
+}
+
+.toast {
+  background: #263640;
+  color: #f0f4f6;
+  padding: 11px 15px;
+  border-radius: 7px;
+  border: 1px solid #40545f;
+  border-left: 4px solid var(--risky);
+  font-size: 12px;
+  box-shadow: 0 8px 25px rgba(0,0,0,.2);
+}
+
+.toast.medium {
+  border-left-color: var(--watch);
+}
+
+
+
+@media (max-width: 1050px) {
+  .shell {
+    grid-template-columns: 190px minmax(0, 1fr);
+  }
+
+  main {
+    padding: 25px 22px 40px;
+  }
+
+  .summary {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .two {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 760px) {
+  .shell {
+    grid-template-columns: 1fr;
+  }
+
+  .side {
+    position: static;
+    height: auto;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 15px;
+    padding: 15px;
+  }
+
+  .brand {
+    flex: 1;
+  }
+
+  nav {
+    display: flex;
+    width: 100%;
+    order: 2;
+    gap: 5px;
+  }
+
+  nav button {
+    flex: 1;
+    justify-content: center;
+    padding: 9px 7px;
+    font-size: 12px;
+  }
+
+  .demo {
+    margin: 0;
+    border: 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  .demo p {
+    display: none;
+  }
+
+  .demo button {
+    font-size: 11px;
+    padding: 6px 8px;
+  }
+
+  main {
+    padding: 22px 15px 35px;
+    gap: 17px;
+  }
+
+  .pm {
+    grid-template-columns: 1fr;
+  }
+
+  .prow {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .seg {
+    width: fit-content;
+  }
+
+  .hero {
+    gap: 15px;
+  }
+
+  .panel {
+    padding: 16px;
+  }
+}
+
+@media (max-width: 420px) {
+  .summary {
+    gap: 8px;
+  }
+
+  .stat {
+    padding: 13px;
+  }
+
+  .stat b {
+    font-size: 24px;
+  }
+
+  .ring.big {
+    width: 90px;
+    height: 90px;
+  }
+
+  .top h3 {
+    font-size: 14px;
+  }
+}
+</style>
+</head>
+<body>
+<div class="shell">
+<aside class="side">
+  <div class="brand">
+    <svg width="34" height="38" viewBox="0 0 34 38" aria-hidden="true"><path d="M17 2 4 7v10c0 9 6 16 13 19 7-3 13-10 13-19V7L17 2z" fill="none" stroke="#5fd0b8" stroke-width="2.5"/><path d="m11 18 4 4 8-9" fill="none" stroke="#5fd0b8" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    <div><b>E.D.I.T.H.</b><span>Permission monitor</span></div>
+  </div>
+  <nav id="nav">
+    <button data-tab="overview" class="on">Overview</button>
+    <button data-tab="permissions">Permissions <i class="pill" id="badge" hidden></i></button>
+    <button data-tab="activity">Activity</button>
+  </nav>
+  <div class="demo">
+    <p>Demo controls</p>
+    <button id="btnMisbehave" class="danger">Make StrideFit misbehave</button>
+    <button id="btnReset">Reset demo</button>
+    <span class="live" id="live"><i></i><span>Live</span></span>
+  </div>
+</aside>
+
+<main>
+  <header><h1 id="pageTitle">Overview</h1><p id="pageSub"></p></header>
+
+  <div class="tab" id="tab-overview">
+    <section class="panel hero" id="hero"></section>
+    <div class="summary" id="summary"></div>
+    <div class="grid" id="apps"></div>
+    <div class="two">
+      <section class="panel"><h2>Trust score over the last 90 seconds</h2><div id="chart"></div><div class="legend" id="legend"></div></section>
+      <section class="panel"><h2>Recommended changes</h2><div id="recs"></div></section>
+    </div>
+  </div>
+
+  <div class="tab" id="tab-permissions" hidden>
+    <div class="pm">
+      <div class="pmlist" id="pmList"></div>
+      <section class="panel" id="pmDetail"></section>
+    </div>
+  </div>
+
+  <div class="tab" id="tab-activity" hidden>
+    <div class="toolbar"><a class="btn" href="/api/export?format=csv" download>Download report (CSV)</a><a class="btn" href="/api/export?format=json" download>Download JSON</a></div>
+    <div class="two">
+      <section class="panel"><h2>Data access log</h2><div class="feed" id="logs"></div></section>
+      <section class="panel"><h2>Alerts and permission changes</h2><div class="feed" id="events"></div></section>
+    </div>
+  </div>
+</main>
+</div>
+<div id="toasts" aria-live="polite"></div>
+
+<script>
+const RES = ['files', 'camera', 'contacts', 'location', 'microphone'];
+const SENSITIVE = ['contacts', 'location', 'microphone'];
+const ICON = { files: '📁', camera: '📷', contacts: '👥', location: '📍', microphone: '🎤' };
+const TABS = {
+  overview: ['Overview', 'How far each app can be trusted right now.'],
+  permissions: ['Permissions', 'Decide what each app can access. Changes apply immediately.'],
+  activity: ['Activity', 'Every data access, alert and permission change.'],
+};
+const $ = (id) => document.getElementById(id);
+const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
+const time = (ts) => new Date(ts).toLocaleTimeString([], { hour12: false });
+const ago = (ts) => { if (!ts) return 'never used'; const s = Math.max(0, Math.round((Date.now() - ts) / 1000)); return 'last used ' + (s < 60 ? s + 's' : Math.floor(s / 60) + 'm') + ' ago'; };
+const last = {}; let recMap = {}, misbehaving = false, pressing = false, lastToast = Date.now(), sel = null, state = null, tab = 'overview';
+const C = 2 * Math.PI * 34;
+
+function setHtml(id, html) { if (last[id] !== html) { $(id).innerHTML = html; last[id] = html; } }
+async function post(url, body) {
+  await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body || {}) });
+  refresh(true);
+}
+function show(t) {
+  tab = TABS[t] ? t : 'overview';
+  for (const k in TABS) $('tab-' + k).hidden = k !== tab;
+  document.querySelectorAll('#nav button').forEach((b) => b.classList.toggle('on', b.dataset.tab === tab));
+  $('pageTitle').textContent = TABS[tab][0]; $('pageSub').textContent = TABS[tab][1];
+  history.replaceState(null, '', '#' + tab);
+}
+
+/* ---------- Overview ---------- */
+const ring = (a, cls = '') => `<svg class="ring ${cls}" viewBox="0 0 84 84" role="img" aria-label="Score ${a.score} out of 100"><circle class="trk" cx="42" cy="42" r="34"/>
+  <circle class="val ${a.band}" cx="42" cy="42" r="34" stroke-dasharray="${(a.score / 100 * C).toFixed(1)} ${C.toFixed(1)}" transform="rotate(-90 42 42)"/><text x="42" y="50" text-anchor="middle">${a.score}</text></svg>`;
+
+function renderApps(apps) {
+  setHtml('apps', apps.map((a) => {
+    const sus = a.status === 'suspended';
+    return `<article class="app ${a.band} ${sus ? 'suspended' : ''}">
+      <div class="top"><span class="icon" style="background:${a.color}">${a.letter}</span>
+        <div class="nm"><h3>${a.name}</h3><div class="purpose">${a.purpose}</div><span class="band ${a.band}">${cap(a.band)}${sus ? ' · Suspended' : ''}</span></div>${ring(a)}</div>
+      <div class="chips">${a.perms.map((p) => `<span class="chip ${p.status} ${p.offPurpose && ['granted', 'restricted'].includes(p.status) ? 'off' : ''}" title="${cap(p.status)}${p.offPurpose ? '. Not needed for this app\'s purpose' : ''}">${ICON[p.resource]} ${p.resource}</span>`).join('')}</div>
+      <div class="why">${a.summaryText}</div>
+      <ul class="bd">${a.breakdown.slice(0, 3).map((b) => `<li><b>-${b.points}</b>${b.label}<br>${b.detail} · ${time(b.ts)}</li>`).join('') || '<li>No penalties. Score is ' + a.score + '.</li>'}</ul>
+      <div class="foot"><button class="small primary" data-act="manage" data-app="${a.id}">Manage permissions</button>
+        <button class="small ${sus ? '' : 'danger'}" data-act="status" data-app="${a.id}" data-val="${sus ? 'active' : 'suspended'}">${sus ? 'Reactivate' : 'Suspend'}</button></div>
+    </article>`;
+  }).join(''));
+}
+
+function renderChart(apps) {
+  const W = 640, H = 260, L = 34, R = 16, T = 10, B = 22;
+  const x = (i, n) => L + (i / Math.max(n - 1, 1)) * (W - L - R), y = (v) => T + (1 - v / 100) * (H - T - B);
+  let svg = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Trust score history for each app">`;
+  [[100, 80, '#1f8a5b', .07], [80, 50, '#c98311', .09], [50, 0, '#d23b2e', .07]].forEach(([a, b, c, o]) =>
+    svg += `<rect x="${L}" y="${y(a)}" width="${W - L - R}" height="${y(b) - y(a)}" fill="${c}" opacity="${o}"/>`);
+  [0, 50, 80, 100].forEach((v) => svg += `<line x1="${L}" x2="${W - R}" y1="${y(v)}" y2="${y(v)}" stroke="#dde3e0"/><text x="${L - 6}" y="${y(v) + 4}" text-anchor="end" font-size="11" fill="#5f6d69">${v}</text>`);
+  apps.forEach((a) => { const n = a.history.length;
+    svg += `<polyline points="${a.history.map((v, i) => x(i, n).toFixed(1) + ',' + y(v).toFixed(1)).join(' ')}" fill="none" stroke="${a.color}" stroke-width="${a.id === 'fitnesstracker' ? 3 : 2}" stroke-linejoin="round"/><circle cx="${x(n - 1, n)}" cy="${y(a.score)}" r="4" fill="${a.color}"/>`; });
+  setHtml('chart', svg + '</svg>');
+  setHtml('legend', apps.map((a) => `<span style="--c:${a.color}">${a.name} ${a.score}</span>`).join(''));
+}
+
+function renderRecs(recs) {
+  recMap = {}; recs.forEach((r) => (recMap[r.id] = r.action));
+  setHtml('recs', recs.length ? recs.map((r) => `<div class="rec"><p><span class="sev ${r.severity}">${cap(r.severity)}</span>${r.text}</p>
+    <button class="small primary" data-act="rec" data-id="${r.id}">${r.actionLabel}</button></div>`).join('') : '<div class="empty">Nothing to fix right now. Every app is behaving as expected.</div>');
+}
+
+/* ---------- Permission manager ---------- */
+function renderPerms(s) {
+  const a = s.apps.find((x) => x.id === sel) || s.apps[0]; sel = a.id;
+  setHtml('pmList', s.apps.map((x) => { const n = x.perms.filter((p) => p.status === 'pending').length;
+    return `<button class="pmitem ${x.id === sel ? 'on' : ''}" data-act="select" data-app="${x.id}"><span class="icon sm" style="background:${x.color}">${x.letter}</span>
+      <span class="nm ${x.band}">${x.name}<small>${cap(x.band)} · ${x.score}</small></span>${n ? `<i class="pill">${n}</i>` : ''}</button>`; }).join(''));
+  const sus = a.status === 'suspended';
+  const rows = RES.map((r) => {
+    const p = a.perms.find((q) => q.resource === r), st = p ? p.status : 'none';
+    const text = { granted: 'Full access · ' + (p && ago(p.lastUsed)), restricted: 'Limited to 3 uses per minute · ' + (p && ago(p.lastUsed)),
+      pending: 'Requested by the app. Waiting for your decision.', revoked: 'Blocked', none: 'Not granted' }[st];
+    const off = p && p.offPurpose && ['granted', 'restricted'].includes(st);
+    const seg = [['approve', 'Allow', 'allow', 'granted'], ['restrict', 'Limit', 'limit', 'restricted'], ['revoke', 'Block', 'block', 'revoked']]
+      .map(([v, l, c, on]) => `<button class="${st === on ? 'on ' + c : ''}" data-act="perm" data-app="${a.id}" data-res="${r}" data-val="${v}" aria-pressed="${st === on}">${l}</button>`).join('');
+    return `<div class="prow ${st}"><div class="pname">${ICON[r]} <b>${r}</b>${SENSITIVE.includes(r) ? '<span class="sens">sensitive</span>' : ''}${off ? '<span class="sens">outside purpose</span>' : ''}<span class="sub">${text}${off ? ' · Not needed for what this app does' : ''}</span></div><div class="seg" role="group" aria-label="${r} access">${seg}</div></div>`;
+  }).join('');
+  const hist = s.events.filter((e) => e.kind === 'change' && e.app === a.name).slice(0, 5);
+  setHtml('pmDetail', `<div class="dhead"><span class="icon" style="background:${a.color}">${a.letter}</span>
+      <div class="nm"><h2>${a.name}</h2><div class="purpose">${a.purpose}</div></div>
+      <button class="small ${sus ? '' : 'danger'}" data-act="status" data-app="${a.id}" data-val="${sus ? 'active' : 'suspended'}">${sus ? 'Reactivate app' : 'Suspend app'}</button></div>
+    ${sus ? '<div class="banner">This app is suspended. All of its access requests are blocked.</div>' : ''}
+    <div class="why" style="margin-bottom:6px">${a.summaryText}</div>${rows}
+    <div class="hist"><h3>Recent changes</h3>${hist.length ? hist.map((e) => `<div class="row"><time>${time(e.ts)}</time><div>${e.message}</div></div>`).join('') : '<div class="empty">No changes yet.</div>'}</div>`);
+}
+
+
+function renderLogs(logs) {
+  setHtml('logs', logs.length ? logs.map((l) => `<div class="row ${l.allowed ? '' : 'denied'}"><time>${time(l.ts)}</time>
+    <div><strong>${l.app}</strong> ${l.allowed ? 'accessed' : 'was denied'} ${l.resource}<small>${l.reason}${l.note ? ' · ' + l.note : ''}</small></div></div>`).join('')
+    : '<div class="empty">No data access yet. Activity appears here as apps use your data.</div>');
+}
+function renderEvents(ev) {
+  setHtml('events', ev.length ? ev.map((e) => `<div class="row"><time>${time(e.ts)}</time><div><span class="sev ${e.severity}">${e.kind === 'alert' ? cap(e.severity) : 'Change'}</span>${e.message}</div></div>`).join('')
+    : '<div class="empty">No alerts yet.</div>');
+}
+
+function renderAll(s) {
+  const m = s.summary, pr = s.privacy;
+  setHtml('hero', `${ring(pr, 'big')}<div class="hmain"><h2>Device privacy score</h2><p class="hl">${pr.headline}</p>
+    <p class="muted">Based on every app's trust score, open permissions that don't fit an app's purpose, and requests waiting for you.</p></div>
+    <div class="auto"><button class="switch" role="switch" aria-checked="${s.autoProtect}" aria-label="Auto-protect" data-act="auto"><i></i></button>
+    <div><b>Auto-protect ${s.autoProtect ? 'is on' : 'is off'}</b><span>Suspends any app whose trust score falls below 30.</span></div></div>`);
+  setHtml('summary', `<div class="stat"><b>${m.monitored}</b><span>Apps monitored</span></div><div class="stat"><b>${m.total}</b><span>Data accesses recorded</span></div>
+    <div class="stat ${m.blocked ? 'bad' : ''}"><b>${m.blocked}</b><span>Accesses blocked</span></div><div class="stat ${m.risky ? 'bad' : ''}"><b>${m.risky}</b><span>Risky apps</span></div>`);
+  renderApps(s.apps); renderChart(s.apps); renderRecs(s.recommendations); renderPerms(s); renderLogs(s.logs); renderEvents(s.events);
+  const pend = s.apps.reduce((n, a) => n + a.perms.filter((p) => p.status === 'pending').length, 0);
+  $('badge').hidden = !pend; $('badge').textContent = pend;
+}
+
+async function refresh(force) {
+  try {
+    const s = await (await fetch('/api/state')).json();
+    state = s; misbehaving = s.misbehaving;
+    $('btnMisbehave').textContent = misbehaving ? 'Stop misbehaving' : `Make ${s.target} misbehave`;
+    $('btnMisbehave').className = misbehaving ? '' : 'danger';
+    $('live').className = 'live'; $('live').lastChild.textContent = 'Live';
+    s.events.filter((e) => e.kind === 'alert' && e.ts > lastToast && e.severity !== 'info').reverse().forEach((e) => {
+      lastToast = Math.max(lastToast, e.ts);
+      const t = document.createElement('div'); t.className = 'toast ' + e.severity; t.textContent = e.message;
+      $('toasts').appendChild(t); setTimeout(() => t.remove(), 6000);
+    });
+    if (!pressing || force) renderAll(s);
+  } catch (e) { $('live').className = 'live off'; $('live').lastChild.textContent = 'Server not reachable'; }
+}
+
+document.addEventListener('mousedown', () => (pressing = true));
+document.addEventListener('mouseup', () => (pressing = false));
+document.addEventListener('click', (e) => {
+  const b = e.target.closest('button[data-act],button[data-tab]');
+  if (!b) return;
+  const d = b.dataset;
+  if (d.tab) return show(d.tab);
+  if (d.act === 'perm') post('/api/permission', { appId: d.app, resource: d.res, value: d.val });
+  if (d.act === 'auto') post('/api/autoprotect', { enabled: !state.autoProtect });
+  if (d.act === 'status') post('/api/status', { appId: d.app, status: d.val });
+  if (d.act === 'rec' && recMap[d.id]) post(recMap[d.id].type === 'permission' ? '/api/permission' : '/api/status', recMap[d.id]);
+  if (d.act === 'select' || d.act === 'manage') { sel = d.app; if (d.act === 'manage') show('permissions'); if (state) renderAll(state); }
+});
+$('btnMisbehave').onclick = () => post('/api/simulator', { misbehaving: !misbehaving });
+$('btnReset').onclick = () => post('/api/reset');
+
+show(location.hash.slice(1));
+refresh();
+setInterval(refresh, 1000);
+</script>
+</body>
+</html>
