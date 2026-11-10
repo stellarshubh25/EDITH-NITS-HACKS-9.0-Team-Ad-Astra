@@ -7,10 +7,9 @@ const path = require('path');
 const PORT = process.env.PORT || 3000;
 
 
-
 const WINDOW_MS = 20000;        
 const SPIKE_FACTOR = 3;         
-const MIN_SPIKE_COUNT = 8;      
+const MIN_SPIKE_COUNT = 8;     
 const COOLDOWN_MS = 15000;      
 const RECOVER_AFTER_MS = 20000; 
 const MISBEHAVE_MULT = 8;       
@@ -49,6 +48,17 @@ const APP_DEFS = [
 ];
 const pick = (x) => (Array.isArray(x) ? x[Math.floor(Math.random() * x.length)] : x);
 
+
+const SCENARIOS = {
+  stridefit: { label: 'StrideFit: data grab', appId: 'fitnesstracker', mult: 8, probes: ['contacts', 'files', 'microphone'], every: 3,
+    blurb: 'StrideFit reads data about 8x more often than normal and asks for contacts, files and microphone.' },
+  creep: { label: 'WeatherNow: permission creep', appId: 'weathernow', mult: 1, probes: ['camera', 'microphone', 'contacts'], every: 4,
+    blurb: 'WeatherNow keeps a normal pace but quietly starts asking for camera, microphone and contacts.' },
+  exfil: { label: 'QuickChat: contact harvesting', appId: 'quickchat', mult: 10, probes: [], only: 'contacts', every: 0,
+    blurb: 'QuickChat is allowed to use contacts, but suddenly reads them about 10x more often than normal.' },
+};
+const TEMP_MS = 60000; 
+
 let state;
 
 function reset() {
@@ -56,20 +66,20 @@ function reset() {
   state = {
     autoProtect: keepAuto,
     startedAt: Date.now(),
-    misbehaving: false,
+    scenario: null, lastChange: null,
     tick: 0, total: 0, blocked: 0,
-    logs: [],   // every access attempt
-    events: [], // alerts and permission changes
+    logs: [],   
+    events: [], 
     apps: APP_DEFS.map((d) => ({
       id: d.id, name: d.name, purpose: d.purpose, color: d.color, letter: d.letter, baseline: d.rate, def: d,
       score: 100, status: 'active',
       perms: Object.fromEntries(d.perms.map((r) => [r, { status: 'granted', uses: 0, recent: [] }])),
-      window: [],          // timestamps of recent access attempts (sliding window)
-      lastPenalty: {},     // penalty type -> time last applied
+      window: [],          
+      lastPenalty: {},     
       lastPenaltyAt: 0,
-      breakdown: [],       // recent penalties: why the score dropped
-      acc: 0,              // simulator accumulator
-      history: [100],      // trust score over time (1 point per second)
+      breakdown: [],       
+      acc: 0,              
+      history: [100],      
     })),
   };
 }
@@ -82,8 +92,6 @@ function addEvent(kind, app, severity, message) {
   state.events.unshift({ ts: Date.now(), kind, app: app.name, severity, message });
   if (state.events.length > 300) state.events.pop();
 }
-
-
 function penalize(app, type, severity, message) {
   const now = Date.now();
   if (now - (app.lastPenalty[type] || 0) < COOLDOWN_MS) return;
@@ -101,7 +109,7 @@ function handleAccess(appId, resource, reason) {
   if (!app) return { error: 'Unknown app' };
   const now = Date.now();
 
-  // Sliding window: drop old timestamps, add this attempt.
+
   app.window.push(now);
   while (app.window.length && now - app.window[0] > WINDOW_MS) app.window.shift();
 
@@ -117,19 +125,19 @@ function handleAccess(appId, resource, reason) {
     }
     const p = app.perms[resource];
     if (!p) {
-      // Rule 2: app asks for a permission it never had -> create a pending request
+      
       app.perms[resource] = { status: 'pending', uses: 0, recent: [] };
       note = 'Requested a new permission';
       penalize(app, 'newPermission', 'medium', `${app.name} requested new permission: ${resource}`);
     } else if (p.status === 'granted') {
       allowed = true;
     } else if (p.status === 'restricted') {
-      // Restricted = limited to 3 uses per minute
+    
       p.recent = p.recent.filter((t) => now - t < 60000);
       if (p.recent.length < 3) { p.recent.push(now); allowed = true; }
       else note = 'Restricted: rate limit reached';
     } else {
-      // Rule 3: pending or revoked -> unauthorized attempt
+     
       note = p.status === 'pending' ? 'Permission not approved yet' : 'Permission revoked';
       penalize(app, 'unauthorized', 'high', `${app.name} tried to access ${resource} without permission`);
     }
@@ -153,24 +161,33 @@ function handleAccess(appId, resource, reason) {
 function simTick() {
   state.tick++;
   const now = Date.now();
+  const sc = state.scenario ? SCENARIOS[state.scenario] : null;
   for (const app of state.apps) {
-    const bad = state.misbehaving && app.id === 'fitnesstracker';
+    const bad = !!sc && sc.appId === app.id;
 
-    // Normal traffic at the app's baseline rate (deterministic, so the demo is predictable)
-    app.acc += ((app.baseline * (bad ? MISBEHAVE_MULT : 1)) / 60) * (0.6 + Math.random() * 0.8); // jitter for realism
+
+    app.acc += ((app.baseline * (bad ? sc.mult : 1)) / 60) * (0.6 + Math.random() * 0.8);
     while (app.acc >= 1) {
       app.acc -= 1;
-      const u = app.def.used;
+      const u = bad && sc.only ? [sc.only] : app.def.used;
       const res = u[Math.floor(Math.random() * u.length)];
-      handleAccess(app.id, res, pick(app.def.reasons[res]));
+      handleAccess(app.id, res, bad && sc.only ? 'Bulk contact sync' : pick(app.def.reasons[res]));
     }
 
-    if (bad && state.tick % 3 === 0) {
-      const targets = ['contacts', 'files', 'microphone'];
-      handleAccess(app.id, targets[Math.floor(state.tick / 3) % 3], 'Unspecified');
+
+    if (bad && sc.probes.length && state.tick % sc.every === 0) {
+      handleAccess(app.id, sc.probes[Math.floor(state.tick / sc.every) % sc.probes.length], 'Unspecified');
     }
 
-    // Slow recovery after a quiet period
+
+    for (const [res, p] of Object.entries(app.perms)) {
+      if (p.expiresAt && now > p.expiresAt) {
+        p.expiresAt = 0; p.status = 'revoked';
+        addEvent('change', app, 'info', `Temporary ${res} access for ${app.name} expired and is now blocked`);
+      }
+    }
+
+
     if (app.status === 'active' && app.score < 100 &&
         now - app.lastPenaltyAt > RECOVER_AFTER_MS && state.tick % 5 === 0) app.score++;
 
@@ -189,6 +206,7 @@ function autoProtect() {
     }
   }
 }
+
 
 function recommendations() {
   const now = Date.now();
@@ -225,16 +243,41 @@ function recommendations() {
   return recs.sort((a, b) => order[a.severity] - order[b.severity]);
 }
 
-
 const PERM_VALUES = { approve: 'granted', restrict: 'restricted', revoke: 'revoked' };
 
 function setPermission(appId, resource, value) {
   const app = findApp(appId);
-  if (!app || !PERM_VALUES[value] || !['files', 'camera', 'contacts', 'location', 'microphone'].includes(resource)) return { error: 'Invalid request' };
-  if (!app.perms[resource]) app.perms[resource] = { status: 'revoked', uses: 0, recent: [] }; // lets the user grant a new permission
-  app.perms[resource].status = PERM_VALUES[value];
-  app.perms[resource].recent = [];
-  addEvent('change', app, 'info', `${resource} permission for ${app.name} set to ${PERM_VALUES[value]}`);
+  if (!app || !(PERM_VALUES[value] || value === 'temp') ||
+      !['files', 'camera', 'contacts', 'location', 'microphone'].includes(resource)) return { error: 'Invalid request' };
+  const had = app.perms[resource];
+  state.lastChange = { appId, resource, prev: had ? had.status : 'none', prevExpires: had ? had.expiresAt || 0 : 0 };
+  if (!had) app.perms[resource] = { status: 'revoked', uses: 0, recent: [] }; // lets the user grant a new permission
+  const p = app.perms[resource];
+  p.recent = [];
+  if (value === 'temp') {
+    p.status = 'granted'; p.expiresAt = Date.now() + TEMP_MS;
+    addEvent('change', app, 'info', `${resource} access for ${app.name} allowed for 1 minute`);
+  } else {
+    p.status = PERM_VALUES[value]; p.expiresAt = 0;
+    addEvent('change', app, 'info', `${resource} permission for ${app.name} set to ${p.status}`);
+  }
+  return { ok: true };
+}
+
+function undoChange() {
+  const c = state.lastChange;
+  const app = c && findApp(c.appId);
+  state.lastChange = null;
+  if (!app) return { error: 'Nothing to undo' };
+  if (c.prev === 'none') delete app.perms[c.resource];
+  else { const p = app.perms[c.resource]; p.status = c.prev; p.expiresAt = c.prevExpires; p.recent = []; }
+  addEvent('change', app, 'info', `Undid the ${c.resource} permission change for ${app.name}`);
+  return { ok: true };
+}
+
+function setScenario(b) {
+  const id = b.scenario || (b.misbehaving ? 'stridefit' : null);
+  state.scenario = SCENARIOS[id] ? id : null;
   return { ok: true };
 }
 
@@ -262,6 +305,7 @@ function privacy() {
   if (off) bits.push(`${off} permission${off > 1 ? 's' : ''} that ${off > 1 ? 'do' : 'does'} not match an app's purpose`);
   return { score, band: band(score), headline: bits.length ? 'Needs attention: ' + bits.join(', ') + '.' : 'All apps are behaving as expected.' };
 }
+
 
 function heatmap() {
   const h = {};
@@ -303,7 +347,10 @@ function exportReport(format) {
 
 function snapshot() {
   return {
-    misbehaving: state.misbehaving,
+    misbehaving: !!state.scenario,
+    scenario: state.scenario,
+    scenarios: Object.entries(SCENARIOS).map(([id, x]) => ({ id, label: x.label, blurb: x.blurb })),
+    canUndo: state.lastChange ? { resource: state.lastChange.resource, appName: (findApp(state.lastChange.appId) || {}).name } : null,
     autoProtect: state.autoProtect,
     privacy: privacy(),
     heat: heatmap(),
@@ -318,7 +365,7 @@ function snapshot() {
       id: a.id, name: a.name, purpose: a.purpose, color: a.color, letter: a.letter, score: a.score, band: band(a.score),
       status: a.status, history: a.history, summaryText: riskSummary(a), breakdown: a.breakdown.slice(0, 4),
       perms: Object.entries(a.perms).map(([resource, p]) => ({
-        resource, status: p.status, uses: p.uses, lastUsed: p.lastUsed || 0, offPurpose: !a.def.expected.includes(resource), sensitive: SENSITIVE.has(resource),
+        resource, status: p.status, uses: p.uses, lastUsed: p.lastUsed || 0, expiresIn: p.expiresAt ? Math.max(0, Math.ceil((p.expiresAt - Date.now()) / 1000)) : 0, offPurpose: !a.def.expected.includes(resource), sensitive: SENSITIVE.has(resource),
       })),
     })),
     logs: state.logs.slice(0, 40),
@@ -356,7 +403,8 @@ const server = http.createServer(async (req, res) => {
     if (url === '/api/access') return send(res, 200, handleAccess(b.appId, b.resource, b.reason));
     if (url === '/api/permission') return send(res, 200, setPermission(b.appId, b.resource, b.value));
     if (url === '/api/status') return send(res, 200, setStatus(b.appId, b.status || b.value));
-    if (url === '/api/simulator') { state.misbehaving = !!b.misbehaving; return send(res, 200, { ok: true }); }
+    if (url === '/api/simulator') return send(res, 200, setScenario(b));
+    if (url === '/api/undo') return send(res, 200, undoChange());
     if (url === '/api/autoprotect') { state.autoProtect = !!b.enabled; return send(res, 200, { ok: true }); }
     if (url === '/api/reset') { reset(); return send(res, 200, { ok: true }); }
     return send(res, 404, { error: 'Not found' });

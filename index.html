@@ -8,7 +8,7 @@
 :root{--bg:#eef1f0;--panel:#fff;--ink:#16211f;--muted:#5f6d69;--line:#dde3e0;--side:#12282b;--safe:#1f8a5b;--watch:#c98311;--risky:#d23b2e;--info:#2b6cb0;
 --serif:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;--sans:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif}
 *{box-sizing:border-box}
-:root{--soft:var(--soft);--track:var(--track);--hover:var(--hover);--rowline:var(--rowline);--off:var(--off);--redbg:var(--redbg);--redline:var(--redline);--bluebg:var(--bluebg);--blueline:var(--blueline);--amberbg:var(--amberbg);--amberline:var(--amberline);--greenline:var(--greenline);--btn:#16211f;color-scheme:light}
+:root{--soft:#f6f8f7;--track:#e6ebe8;--hover:#e9eeeb;--rowline:#e8ece6;--off:#c9d1ce;--redbg:#fcefed;--redline:#e7a29b;--bluebg:#edf3fa;--blueline:#9db9dc;--amberbg:#fdf6e6;--amberline:#e4c07a;--greenline:#9bd1b6;--btn:#16211f;color-scheme:light}
 :root[data-theme=dark]{--bg:#0e1819;--panel:#162426;--ink:#e4eeeb;--muted:#96aaa5;--line:#2a3c3a;--side:#0a1315;--safe:#3fbf86;--watch:#e0a03a;--risky:#e5483b;--info:#6fa8e0;
 --soft:#1d3032;--track:#2a3c3a;--hover:#243a3c;--rowline:#223432;--off:#44585a;--redbg:#3a1f1e;--redline:#7d3a35;--bluebg:#1b2c3f;--blueline:#365a85;--amberbg:#3a2f17;--amberline:#7d6224;--greenline:#2d6b4f;--btn:#2a8f83;color-scheme:dark}
 body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 var(--sans)}
@@ -118,12 +118,50 @@ header p{color:var(--muted)}
 .heat td{text-align:center;padding:9px 4px;border-radius:6px;font-variant-numeric:tabular-nums}
 .heat td.h0{color:var(--muted);background:var(--soft)}
 .note{color:var(--muted);font-size:13px;margin-top:6px}
+.ctl{display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:flex-end}
+.scn{background:var(--amberbg);border:1px solid var(--amberline);border-radius:10px;padding:10px 14px}
+.row.fresh{background:linear-gradient(90deg,rgba(95,208,184,.22),transparent)}
+.demo{grid-template-columns:minmax(0,1fr)}
+.demo select{width:100%;min-width:0;text-overflow:ellipsis;font:inherit;padding:6px 8px;border-radius:8px;background:rgba(255,255,255,.08);color:#fff;border:1px solid rgba(255,255,255,.2)}
+.demo select option{color:#16211f}
+.chk{display:inline-flex;gap:6px;align-items:center;font-size:14px}
+.toolbar select{font:inherit;padding:5px 8px;border-radius:8px;border:1px solid var(--line);background:var(--panel);color:var(--ink)}
 .toolbar{display:flex;gap:8px;flex-wrap:wrap}
 #toasts{position:fixed;right:18px;bottom:18px;display:grid;gap:10px;z-index:10;max-width:360px}
 .toast{background:#16211f;color:#fff;padding:10px 14px;border-radius:8px;border-left:5px solid var(--risky);font-size:14px;box-shadow:0 6px 20px rgba(0,0,0,.25)}
 .toast.medium{border-left-color:var(--watch)}
 @media(max-width:900px){.shell{grid-template-columns:1fr}.side{position:static;height:auto;flex-direction:row;flex-wrap:wrap;align-items:center}
 .demo{margin:0 0 0 auto;border:0;padding:0;display:flex}.demo p{display:none}.two,.pm{grid-template-columns:1fr}.summary{grid-template-columns:repeat(2,1fr)}main{padding:18px}}
+/* ===== Appearance upgrade: paste at the end of your style block ===== */
+body{background:radial-gradient(1100px 480px at 75% -10%,rgba(95,208,184,.12),transparent 60%),var(--bg)}
+.side{background:linear-gradient(180deg,var(--side),#0d2023)}
+nav button{border-radius:10px;transition:background .15s}
+.panel,.stat,.app,.pmitem{box-shadow:0 1px 2px rgba(18,40,43,.05),0 6px 18px rgba(18,40,43,.04);transition:transform .15s,box-shadow .15s}
+.app:hover{transform:translateY(-2px);box-shadow:0 10px 26px rgba(18,40,43,.14)}
+.hero{background:linear-gradient(120deg,var(--panel),var(--soft))}
+.hero .ring.big{filter:drop-shadow(0 4px 10px rgba(31,138,91,.28))}
+.app.risky{animation:glow 2s ease-in-out infinite}
+@keyframes glow{0%,100%{box-shadow:0 0 0 0 rgba(210,59,46,0)}50%{box-shadow:0 0 0 5px rgba(210,59,46,.2)}}
+.live i{animation:pulse 1.6s infinite}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(79,208,138,.6)}100%{box-shadow:0 0 0 8px rgba(79,208,138,0)}}
+header{position:sticky;top:0;z-index:5;display:grid;grid-template-columns:1fr auto;align-items:center;column-gap:12px;
+  background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(8px);padding:6px 0 10px;margin-top:-6px}
+header #btnReport{grid-column:2;grid-row:1/3}
+.toast{animation:slide .25s ease-out}
+@keyframes slide{from{transform:translateX(20px);opacity:0}}
+button{transition:background .15s,border-color .15s,transform .05s}
+button:active{transform:scale(.97)}
+.icon{box-shadow:0 2px 6px rgba(0,0,0,.18)}
+.band{text-transform:uppercase;letter-spacing:.06em;font-size:12px}
+::-webkit-scrollbar{width:10px;height:10px}
+::-webkit-scrollbar-thumb{background:var(--line);border-radius:6px}
+body.present{zoom:1.15}
+.modal{position:fixed;inset:0;background:rgba(10,20,22,.6);display:grid;place-items:center;z-index:20}
+.sheet{background:var(--panel);color:var(--ink);width:min(780px,92vw);max-height:86vh;overflow:auto;border-radius:14px;padding:20px 24px}
+.shead{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:12px}
+.sheet pre{white-space:pre-wrap;font:13.5px/1.6 ui-monospace,Menlo,Consolas,monospace;margin:0}
+@media print{body>*:not(.modal){display:none!important}.modal{position:static;background:none}.sheet{max-height:none;width:auto}.shead .toolbar{display:none}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
 <body>
@@ -140,7 +178,8 @@ header p{color:var(--muted)}
   </nav>
   <div class="demo">
     <p>Demo controls</p>
-    <button id="btnMisbehave" class="danger">Make StrideFit misbehave</button>
+    <select id="scenarioSel" aria-label="Attack scenario"></select>
+    <button id="btnMisbehave" class="danger">Start scenario</button>
     <button id="btnReset">Reset demo</button>
     <button id="btnTheme">Switch to dark mode</button>
     <span class="live" id="live"><i></i><span>Live</span></span>
@@ -151,6 +190,7 @@ header p{color:var(--muted)}
   <header><h1 id="pageTitle">Overview</h1><p id="pageSub"></p></header>
 
   <div class="tab" id="tab-overview">
+    <div id="scn"></div>
     <section class="panel hero" id="hero"></section>
     <div class="summary" id="summary"></div>
     <div class="grid" id="apps"></div>
@@ -170,7 +210,8 @@ header p{color:var(--muted)}
   </div>
 
   <div class="tab" id="tab-activity" hidden>
-    <div class="toolbar"><a class="btn" href="/api/export?format=csv" download>Download report (CSV)</a><a class="btn" href="/api/export?format=json" download>Download JSON</a></div>
+    <div class="toolbar"><a class="btn" href="/api/export?format=csv" download>Download report (CSV)</a><a class="btn" href="/api/export?format=json" download>Download JSON</a>
+      <select id="fApp" aria-label="Filter by app"><option value="">All apps</option></select><label class="chk"><input type="checkbox" id="fDenied"> Denied only</label></div>
     <div class="two">
       <section class="panel"><h2>Data access log</h2><div class="feed" id="logs"></div></section>
       <section class="panel"><h2>Alerts and permission changes</h2><div class="feed" id="events"></div></section>
@@ -180,6 +221,428 @@ header p{color:var(--muted)}
 </div>
 <div id="toasts" aria-live="polite"></div>
 
+<script>
+/* Built-in E.D.I.T.H. engine. Only used when no server is available (for example on static hosting). Same logic as server.js. */
+(function () {
+'use strict';
+// ---------- Tunable settings (change these to tune your demo) ----------
+const WINDOW_MS = 20000;        // sliding window used to measure access rate
+const SPIKE_FACTOR = 3;         // rate above (baseline x this) counts as a spike
+const MIN_SPIKE_COUNT = 8;      // ignore tiny windows
+const COOLDOWN_MS = 15000;      // same penalty type applies at most once per this time
+const RECOVER_AFTER_MS = 20000; // quiet time before trust score starts recovering
+const MISBEHAVE_MULT = 8;       // how much faster the bad app accesses data
+const PENALTY = { spike: 15, newPermission: 10, unauthorized: 20, offPurpose: 8 };
+const AUTO_SUSPEND_BELOW = 30; // auto-protect threshold
+const PENALTY_LABEL = { spike: 'Unusual access frequency', newPermission: 'New permission request', unauthorized: 'Unauthorized access attempt', offPurpose: 'Request outside the app\'s purpose' };
+const SENSITIVE = new Set(['contacts', 'location', 'microphone']);
+
+// ---------- The three demo apps ----------
+const APP_DEFS = [
+  {
+    id: 'photoeditor', expected: ['files', 'camera'], name: 'Lumina Photos', purpose: 'Edits and filters your photos', color: '#c2603a', letter: 'L',
+    perms: ['files', 'camera'], used: ['files', 'camera'], rate: 6, // normal accesses per minute
+    reasons: { files: ['Open photo to edit', 'Export edited photo', 'Load filter presets'], camera: ['Take a new photo', 'Scan a document'] },
+  },
+  {
+    id: 'notesapp', expected: ['files'], name: 'Notable', purpose: 'Keeps your personal notes', color: '#6b5b95', letter: 'N',
+    perms: ['files', 'location'], used: ['files'], rate: 4, // has location but never uses it
+    reasons: { files: ['Save note', 'Sync notes', 'Attach file to note'] },
+  },
+  {
+    id: 'fitnesstracker', expected: ['location'], name: 'StrideFit', purpose: 'Tracks your runs and workouts', color: '#2f8f6b', letter: 'S',
+    perms: ['location'], used: ['location'], rate: 5,
+    reasons: { location: ['Record running route', 'Update pace and distance'] },
+  },
+  {
+    id: 'quickchat', expected: ['contacts', 'camera', 'microphone'], name: 'QuickChat', purpose: 'Messages and calls with friends', color: '#2f5d8a', letter: 'Q',
+    perms: ['contacts', 'camera', 'microphone'], used: ['contacts', 'microphone', 'camera'], rate: 7,
+    reasons: { contacts: ['Find friends on QuickChat', 'Show contact names'], microphone: ['Voice message', 'Voice call'], camera: ['Video call', 'Send photo'] },
+  },
+  {
+    id: 'weathernow', expected: ['location'], name: 'WeatherNow', purpose: 'Shows your local forecast', color: '#b8860b', letter: 'W',
+    perms: ['location'], used: ['location'], rate: 3,
+    reasons: { location: ['Refresh local forecast', 'Check rain alerts'] },
+  },
+];
+const pick = (x) => (Array.isArray(x) ? x[Math.floor(Math.random() * x.length)] : x);
+
+
+const SCENARIOS = {
+  stridefit: { label: 'StrideFit: data grab', appId: 'fitnesstracker', mult: 8, probes: ['contacts', 'files', 'microphone'], every: 3,
+    blurb: 'StrideFit reads data about 8x more often than normal and asks for contacts, files and microphone.' },
+  creep: { label: 'WeatherNow: permission creep', appId: 'weathernow', mult: 1, probes: ['camera', 'microphone', 'contacts'], every: 4,
+    blurb: 'WeatherNow keeps a normal pace but quietly starts asking for camera, microphone and contacts.' },
+  exfil: { label: 'QuickChat: contact harvesting', appId: 'quickchat', mult: 10, probes: [], only: 'contacts', every: 0,
+    blurb: 'QuickChat is allowed to use contacts, but suddenly reads them about 10x more often than normal.' },
+};
+const TEMP_MS = 60000; 
+
+let state;
+
+function reset() {
+  const keepAuto = state ? state.autoProtect : false;
+  state = {
+    autoProtect: keepAuto,
+    startedAt: Date.now(),
+    scenario: null, lastChange: null,
+    tick: 0, total: 0, blocked: 0,
+    logs: [],   
+    events: [], 
+    apps: APP_DEFS.map((d) => ({
+      id: d.id, name: d.name, purpose: d.purpose, color: d.color, letter: d.letter, baseline: d.rate, def: d,
+      score: 100, status: 'active',
+      perms: Object.fromEntries(d.perms.map((r) => [r, { status: 'granted', uses: 0, recent: [] }])),
+      window: [],          
+      lastPenalty: {},     
+      lastPenaltyAt: 0,
+      breakdown: [],     
+      acc: 0,             
+      history: [100],   
+    })),
+  };
+}
+
+
+const band = (s) => (s >= 80 ? 'safe' : s >= 50 ? 'watch' : 'risky');
+const findApp = (id) => state.apps.find((a) => a.id === id);
+
+function addEvent(kind, app, severity, message) {
+  state.events.unshift({ ts: Date.now(), kind, app: app.name, severity, message });
+  if (state.events.length > 300) state.events.pop();
+}
+
+
+function penalize(app, type, severity, message) {
+  const now = Date.now();
+  if (now - (app.lastPenalty[type] || 0) < COOLDOWN_MS) return;
+  app.lastPenalty[type] = now;
+  app.lastPenaltyAt = now;
+  app.score = Math.max(0, app.score - PENALTY[type]);
+  app.breakdown.unshift({ ts: now, type, points: PENALTY[type], label: PENALTY_LABEL[type], detail: message });
+  if (app.breakdown.length > 12) app.breakdown.pop();
+  addEvent('alert', app, severity, `${message} (trust score -${PENALTY[type]})`);
+}
+
+
+function handleAccess(appId, resource, reason) {
+  const app = findApp(appId);
+  if (!app) return { error: 'Unknown app' };
+  const now = Date.now();
+
+
+  app.window.push(now);
+  while (app.window.length && now - app.window[0] > WINDOW_MS) app.window.shift();
+
+  let allowed = false;
+  let note = '';
+
+  if (app.status === 'suspended') {
+    note = 'App is suspended';
+    state.total++; state.blocked++;
+  } else {
+    if (!app.def.expected.includes(resource)) {
+      penalize(app, 'offPurpose', 'medium', `${app.name} requested ${resource}, which does not match its purpose`);
+    }
+    const p = app.perms[resource];
+    if (!p) {
+    
+      app.perms[resource] = { status: 'pending', uses: 0, recent: [] };
+      note = 'Requested a new permission';
+      penalize(app, 'newPermission', 'medium', `${app.name} requested new permission: ${resource}`);
+    } else if (p.status === 'granted') {
+      allowed = true;
+    } else if (p.status === 'restricted') {
+      
+      p.recent = p.recent.filter((t) => now - t < 60000);
+      if (p.recent.length < 3) { p.recent.push(now); allowed = true; }
+      else note = 'Restricted: rate limit reached';
+    } else {
+    
+      note = p.status === 'pending' ? 'Permission not approved yet' : 'Permission revoked';
+      penalize(app, 'unauthorized', 'high', `${app.name} tried to access ${resource} without permission`);
+    }
+    if (allowed) { app.perms[resource].uses++; app.perms[resource].lastUsed = now; }
+    state.total++; if (!allowed) state.blocked++;
+
+
+    const ratePerMin = app.window.length * (60000 / WINDOW_MS);
+    if (app.window.length >= MIN_SPIKE_COUNT && ratePerMin > app.baseline * SPIKE_FACTOR) {
+      penalize(app, 'spike', 'medium',
+        `${app.name} is accessing data ${Math.round(ratePerMin / app.baseline)}x more often than normal`);
+    }
+  }
+
+  state.logs.unshift({ ts: now, app: app.name, resource, reason: reason || 'No reason given', allowed, note });
+  if (state.logs.length > 1000) state.logs.pop();
+  return { allowed, note };
+}
+
+
+function simTick() {
+  state.tick++;
+  const now = Date.now();
+  const sc = state.scenario ? SCENARIOS[state.scenario] : null;
+  for (const app of state.apps) {
+    const bad = !!sc && sc.appId === app.id;
+
+
+    app.acc += ((app.baseline * (bad ? sc.mult : 1)) / 60) * (0.6 + Math.random() * 0.8);
+    while (app.acc >= 1) {
+      app.acc -= 1;
+      const u = bad && sc.only ? [sc.only] : app.def.used;
+      const res = u[Math.floor(Math.random() * u.length)];
+      handleAccess(app.id, res, bad && sc.only ? 'Bulk contact sync' : pick(app.def.reasons[res]));
+    }
+
+    
+    if (bad && sc.probes.length && state.tick % sc.every === 0) {
+      handleAccess(app.id, sc.probes[Math.floor(state.tick / sc.every) % sc.probes.length], 'Unspecified');
+    }
+
+   
+    for (const [res, p] of Object.entries(app.perms)) {
+      if (p.expiresAt && now > p.expiresAt) {
+        p.expiresAt = 0; p.status = 'revoked';
+        addEvent('change', app, 'info', `Temporary ${res} access for ${app.name} expired and is now blocked`);
+      }
+    }
+
+    
+    if (app.status === 'active' && app.score < 100 &&
+        now - app.lastPenaltyAt > RECOVER_AFTER_MS && state.tick % 5 === 0) app.score++;
+
+    app.history.push(app.score);
+    if (app.history.length > 90) app.history.shift();
+  }
+  autoProtect();
+}
+
+function autoProtect() {
+  if (!state.autoProtect) return;
+  for (const app of state.apps) {
+    if (app.status === 'active' && app.score < AUTO_SUSPEND_BELOW) {
+      setStatus(app.id, 'suspended');
+      addEvent('alert', app, 'high', `Auto-protect suspended ${app.name} (trust score ${app.score})`);
+    }
+  }
+}
+
+
+function recommendations() {
+  const now = Date.now();
+  const recs = [];
+  for (const app of state.apps) {
+    if (app.status === 'suspended') continue;
+    for (const [res, p] of Object.entries(app.perms)) {
+      if (p.status === 'pending') {
+        recs.push({
+          id: `deny-${app.id}-${res}`, severity: SENSITIVE.has(res) ? 'high' : 'medium',
+          text: `${app.name} asked for ${res} access, which doesn't fit its purpose (${app.purpose.toLowerCase()}).`,
+          actionLabel: `Deny ${res}`, action: { type: 'permission', appId: app.id, resource: res, value: 'revoke' },
+        });
+      }
+      const off = !app.def.expected.includes(res);
+      if (p.status === 'granted' && (off || (p.uses === 0 && now - state.startedAt > 30000))) {
+        recs.push({
+          id: `unused-${app.id}-${res}`, severity: off && SENSITIVE.has(res) ? 'high' : SENSITIVE.has(res) ? 'medium' : 'low',
+          text: off ? `${app.name} has ${res} access, which does not match its purpose (${app.purpose.toLowerCase()}). Revoking reduces your exposure.`
+                 : `${app.name} has ${res} access but has never used it. Revoking reduces your exposure.`,
+          actionLabel: `Revoke ${res}`, action: { type: 'permission', appId: app.id, resource: res, value: 'revoke' },
+        });
+      }
+    }
+    if (app.score < 50) {
+      recs.push({
+        id: `suspend-${app.id}`, severity: 'high',
+        text: `${app.name} has a trust score of ${app.score}. Suspend it until you have reviewed its activity.`,
+        actionLabel: 'Suspend app', action: { type: 'status', appId: app.id, value: 'suspended' },
+      });
+    }
+  }
+  const order = { high: 0, medium: 1, low: 2 };
+  return recs.sort((a, b) => order[a.severity] - order[b.severity]);
+}
+
+
+const PERM_VALUES = { approve: 'granted', restrict: 'restricted', revoke: 'revoked' };
+
+function setPermission(appId, resource, value) {
+  const app = findApp(appId);
+  if (!app || !(PERM_VALUES[value] || value === 'temp') ||
+      !['files', 'camera', 'contacts', 'location', 'microphone'].includes(resource)) return { error: 'Invalid request' };
+  const had = app.perms[resource];
+  state.lastChange = { appId, resource, prev: had ? had.status : 'none', prevExpires: had ? had.expiresAt || 0 : 0 };
+  if (!had) app.perms[resource] = { status: 'revoked', uses: 0, recent: [] }; // lets the user grant a new permission
+  const p = app.perms[resource];
+  p.recent = [];
+  if (value === 'temp') {
+    p.status = 'granted'; p.expiresAt = Date.now() + TEMP_MS;
+    addEvent('change', app, 'info', `${resource} access for ${app.name} allowed for 1 minute`);
+  } else {
+    p.status = PERM_VALUES[value]; p.expiresAt = 0;
+    addEvent('change', app, 'info', `${resource} permission for ${app.name} set to ${p.status}`);
+  }
+  return { ok: true };
+}
+
+function undoChange() {
+  const c = state.lastChange;
+  const app = c && findApp(c.appId);
+  state.lastChange = null;
+  if (!app) return { error: 'Nothing to undo' };
+  if (c.prev === 'none') delete app.perms[c.resource];
+  else { const p = app.perms[c.resource]; p.status = c.prev; p.expiresAt = c.prevExpires; p.recent = []; }
+  addEvent('change', app, 'info', `Undid the ${c.resource} permission change for ${app.name}`);
+  return { ok: true };
+}
+
+function setScenario(b) {
+  const id = b.scenario || (b.misbehaving ? 'stridefit' : null);
+  state.scenario = SCENARIOS[id] ? id : null;
+  return { ok: true };
+}
+
+function setStatus(appId, status) {
+  const app = findApp(appId);
+  if (!app || !['active', 'suspended'].includes(status)) return { error: 'Invalid request' };
+  app.status = status;
+  addEvent('change', app, 'info', `${app.name} was ${status === 'suspended' ? 'suspended' : 'reactivated'}`);
+  return { ok: true };
+}
+
+function privacy() {
+  const avg = state.apps.reduce((n, a) => n + a.score, 0) / state.apps.length;
+  let off = 0, pend = 0;
+  for (const a of state.apps) for (const [r, p] of Object.entries(a.perms)) {
+    if (p.status === 'granted' && !a.def.expected.includes(r)) off++;
+    if (p.status === 'pending') pend++;
+  }
+  const score = Math.max(0, Math.round(avg - off * 4 - pend * 3));
+  const risky = state.apps.filter((a) => a.score < 50).length;
+  const bits = [];
+  if (risky) bits.push(`${risky} risky app${risky > 1 ? 's' : ''}`);
+  if (pend) bits.push(`${pend} permission request${pend > 1 ? 's' : ''} waiting for you`);
+  if (off) bits.push(`${off} permission${off > 1 ? 's' : ''} that ${off > 1 ? 'do' : 'does'} not match an app's purpose`);
+  return { score, band: band(score), headline: bits.length ? 'Needs attention: ' + bits.join(', ') + '.' : 'All apps are behaving as expected.' };
+}
+
+
+function heatmap() {
+  const h = {};
+  for (const a of state.apps) h[a.id] = {};
+  for (const l of state.logs) {
+    const a = state.apps.find((x) => x.name === l.app);
+    if (!a) continue;
+    const c = h[a.id][l.resource] || (h[a.id][l.resource] = { allowed: 0, denied: 0 });
+    if (l.allowed) c.allowed++; else c.denied++;
+  }
+  return h;
+}
+
+
+function riskSummary(a) {
+  if (a.status === 'suspended') return 'Suspended. All of its access requests are being blocked.';
+  const now = Date.now();
+  const recent = (t) => now - (a.lastPenalty[t] || 0) < 60000;
+  const asked = Object.entries(a.perms).filter(([, p]) => p.status === 'pending' || p.status === 'revoked').map(([r]) => r);
+  const parts = [];
+  if (recent('spike')) parts.push('is accessing data far more often than normal');
+  if (asked.length) parts.push(`asked for ${asked.join(', ')}, which does not match its purpose (${a.purpose.toLowerCase()})`);
+  else if (recent('unauthorized')) parts.push('tried to use data it was not given');
+  if (!parts.length) return a.score >= 80 ? 'Behaving normally. Its access matches its purpose and usual pattern.' : 'Recently flagged. Recovering while its behavior stays normal.';
+  return `${a.name} ${parts.join(' and ')}.`;
+}
+
+// ---------- Audit report export ----------
+function exportReport(format) {
+  const rows = [
+    ...state.logs.map((l) => ({ time: l.ts, type: 'access', app: l.app, detail: `${l.resource}: ${l.reason}`, result: l.allowed ? 'allowed' : 'denied' + (l.note ? ' (' + l.note + ')' : '') })),
+    ...state.events.map((e) => ({ time: e.ts, type: e.kind, app: e.app, detail: e.message, result: e.severity })),
+  ].sort((a, b) => a.time - b.time).map((r) => ({ ...r, time: new Date(r.time).toISOString() }));
+  if (format === 'json') return { type: 'application/json', body: JSON.stringify({ generatedAt: new Date().toISOString(), apps: state.apps.map((a) => ({ name: a.name, trustScore: a.score, status: a.status })), records: rows }, null, 2), ext: 'json' };
+  const q = (v) => '"' + String(v).replace(/"/g, '""') + '"';
+  return { type: 'text/csv', body: 'time,type,app,detail,result\n' + rows.map((r) => [r.time, r.type, r.app, r.detail, r.result].map(q).join(',')).join('\n'), ext: 'csv' };
+}
+
+// ---------- API snapshot for the dashboard ----------
+function snapshot() {
+  return {
+    misbehaving: !!state.scenario,
+    scenario: state.scenario,
+    scenarios: Object.entries(SCENARIOS).map(([id, x]) => ({ id, label: x.label, blurb: x.blurb })),
+    canUndo: state.lastChange ? { resource: state.lastChange.resource, appName: (findApp(state.lastChange.appId) || {}).name } : null,
+    autoProtect: state.autoProtect,
+    privacy: privacy(),
+    heat: heatmap(),
+    target: findApp('fitnesstracker').name,
+    summary: {
+      monitored: state.apps.length,
+      risky: state.apps.filter((a) => a.score < 50).length,
+      total: state.total, blocked: state.blocked,
+      alerts: state.events.filter((e) => e.kind === 'alert').length,
+    },
+    apps: state.apps.map((a) => ({
+      id: a.id, name: a.name, purpose: a.purpose, color: a.color, letter: a.letter, score: a.score, band: band(a.score),
+      status: a.status, history: a.history, summaryText: riskSummary(a), breakdown: a.breakdown.slice(0, 4),
+      perms: Object.entries(a.perms).map(([resource, p]) => ({
+        resource, status: p.status, uses: p.uses, lastUsed: p.lastUsed || 0, expiresIn: p.expiresAt ? Math.max(0, Math.ceil((p.expiresAt - Date.now()) / 1000)) : 0, offPurpose: !a.def.expected.includes(resource), sensitive: SENSITIVE.has(resource),
+      })),
+    })),
+    logs: state.logs.slice(0, 40),
+    events: state.events.slice(0, 40),
+    recommendations: recommendations(),
+  };
+}
+
+
+function route(method, url, b) {
+  if (method === 'GET' && url === '/api/state') return snapshot();
+  if (method === 'POST') {
+    if (url === '/api/access') return handleAccess(b.appId, b.resource, b.reason);
+    if (url === '/api/permission') return setPermission(b.appId, b.resource, b.value);
+    if (url === '/api/status') return setStatus(b.appId, b.status || b.value);
+    if (url === '/api/simulator') return setScenario(b);
+    if (url === '/api/undo') return undoChange();
+    if (url === '/api/autoprotect') { state.autoProtect = !!b.enabled; return { ok: true }; }
+    if (url === '/api/reset') { reset(); return { ok: true }; }
+  }
+  return { error: 'Not found' };
+}
+function download(r) {
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([r.body], { type: r.type }));
+  a.download = 'edith-audit-report.' + r.ext;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+}
+
+let local = false;
+const realFetch = window.fetch.bind(window);
+document.addEventListener('click', (e) => {
+  const l = local && e.target.closest('a[href^="/api/export"]');
+  if (!l) return;
+  e.preventDefault();
+  download(exportReport(l.getAttribute('href').includes('format=json') ? 'json' : 'csv'));
+});
+window.fetch = async (input, init) => {
+  init = init || {};
+  const url = typeof input === 'string' ? input : input.url;
+  if (!url.startsWith('/api/')) return realFetch(input, init);
+  if (!local) {
+    try {
+      const r = await realFetch(input, init);
+      if (r.ok && (r.headers.get('content-type') || '').includes('json')) return r;
+    } catch (e) { /* no server: fall through to the in-browser engine */ }
+    local = true; window.__edithLocal = true;
+    reset(); setInterval(simTick, 1000);
+  }
+  let body = {}; try { body = JSON.parse(init.body || '{}'); } catch (e) {}
+  const data = route((init.method || 'GET').toUpperCase(), url.split('?')[0], body);
+  return new Response(JSON.stringify(data), { status: 200, headers: { 'Content-Type': 'application/json' } });
+};
+})();
+</script>
 <script>
 const RES = ['files', 'camera', 'contacts', 'location', 'microphone'];
 const SENSITIVE = ['contacts', 'location', 'microphone'];
@@ -262,25 +725,27 @@ function renderRecs(recs) {
     <button class="small primary" data-act="rec" data-id="${r.id}">${r.actionLabel}</button></div>`).join('') : '<div class="empty">Nothing to fix right now. Every app is behaving as expected.</div>');
 }
 
-
+/* ---------- Permission manager ---------- */
 function renderPerms(s) {
   const a = s.apps.find((x) => x.id === sel) || s.apps[0]; sel = a.id;
   setHtml('pmList', s.apps.map((x) => { const n = x.perms.filter((p) => p.status === 'pending').length;
     return `<button class="pmitem ${x.id === sel ? 'on' : ''}" data-act="select" data-app="${x.id}"><span class="icon sm" style="background:${x.color}">${x.letter}</span>
       <span class="nm ${x.band}">${x.name}<small>${cap(x.band)} · ${x.score}</small></span>${n ? `<i class="pill">${n}</i>` : ''}</button>`; }).join(''));
   const sus = a.status === 'suspended';
+  const undo = s.canUndo ? `<button class="small" data-act="undo" title="Undo the last permission change">Undo: ${s.canUndo.resource} on ${s.canUndo.appName}</button>` : '';
   const rows = RES.map((r) => {
     const p = a.perms.find((q) => q.resource === r), st = p ? p.status : 'none';
-    const text = { granted: 'Full access · ' + (p && ago(p.lastUsed)), restricted: 'Limited to 3 uses per minute · ' + (p && ago(p.lastUsed)),
+    const text = { granted: (p && p.expiresIn ? 'Temporary access, expires in ' + p.expiresIn + 's' : 'Full access') + ' · ' + (p && ago(p.lastUsed)), restricted: 'Limited to 3 uses per minute · ' + (p && ago(p.lastUsed)),
       pending: 'Requested by the app. Waiting for your decision.', revoked: 'Blocked', none: 'Not granted' }[st];
     const off = p && p.offPurpose && ['granted', 'restricted'].includes(st);
+    const tempBtn = `<button class="small" data-act="perm" data-app="${a.id}" data-res="${r}" data-val="temp">Allow 1 min</button>`;
     const seg = [['approve', 'Allow', 'allow', 'granted'], ['restrict', 'Limit', 'limit', 'restricted'], ['revoke', 'Block', 'block', 'revoked']]
       .map(([v, l, c, on]) => `<button class="${st === on ? 'on ' + c : ''}" data-act="perm" data-app="${a.id}" data-res="${r}" data-val="${v}" aria-pressed="${st === on}">${l}</button>`).join('');
-    return `<div class="prow ${st}"><div class="pname">${ICON[r]} <b>${r}</b>${SENSITIVE.includes(r) ? '<span class="sens">sensitive</span>' : ''}${off ? '<span class="sens">outside purpose</span>' : ''}<span class="sub">${text}${off ? ' · Not needed for what this app does' : ''}</span></div><div class="seg" role="group" aria-label="${r} access">${seg}</div></div>`;
+    return `<div class="prow ${st}"><div class="pname">${ICON[r]} <b>${r}</b>${SENSITIVE.includes(r) ? '<span class="sens">sensitive</span>' : ''}${off ? '<span class="sens">outside purpose</span>' : ''}<span class="sub">${text}${off ? ' · Not needed for what this app does' : ''}</span></div><div class="ctl">${tempBtn}<div class="seg" role="group" aria-label="${r} access">${seg}</div></div></div>`;
   }).join('');
   const hist = s.events.filter((e) => e.kind === 'change' && e.app === a.name).slice(0, 5);
   setHtml('pmDetail', `<div class="dhead"><span class="icon" style="background:${a.color}">${a.letter}</span>
-      <div class="nm"><h2>${a.name}</h2><div class="purpose">${a.purpose}</div></div>
+      <div class="nm"><h2>${a.name}</h2><div class="purpose">${a.purpose}</div></div>${undo}
       <button class="small ${sus ? '' : 'danger'}" data-act="status" data-app="${a.id}" data-val="${sus ? 'active' : 'suspended'}">${sus ? 'Reactivate app' : 'Suspend app'}</button></div>
     ${sus ? '<div class="banner">This app is suspended. All of its access requests are blocked.</div>' : ''}
     <div class="why" style="margin-bottom:6px">${a.summaryText}</div>${rows}
@@ -288,18 +753,23 @@ function renderPerms(s) {
 }
 
 /* ---------- Activity ---------- */
-function renderLogs(logs) {
-  setHtml('logs', logs.length ? logs.map((l) => `<div class="row ${l.allowed ? '' : 'denied'}"><time>${time(l.ts)}</time>
+const fresh = (ts) => (Date.now() - ts < 3000 ? ' fresh' : '');
+function renderLogs(all) {
+  const app = $('fApp').value, denied = $('fDenied').checked;
+  const logs = all.filter((l) => (!app || l.app === app) && (!denied || !l.allowed));
+  setHtml('logs', logs.length ? logs.map((l) => `<div class="row ${l.allowed ? '' : 'denied'}${fresh(l.ts)}"><time>${time(l.ts)}</time>
     <div><strong>${l.app}</strong> ${l.allowed ? 'accessed' : 'was denied'} ${l.resource}<small>${l.reason}${l.note ? ' · ' + l.note : ''}</small></div></div>`).join('')
-    : '<div class="empty">No data access yet. Activity appears here as apps use your data.</div>');
+    : '<div class="empty">Nothing to show. Activity appears here as apps use your data.</div>');
 }
 function renderEvents(ev) {
-  setHtml('events', ev.length ? ev.map((e) => `<div class="row"><time>${time(e.ts)}</time><div><span class="sev ${e.severity}">${e.kind === 'alert' ? cap(e.severity) : 'Change'}</span>${e.message}</div></div>`).join('')
+  setHtml('events', ev.length ? ev.map((e) => `<div class="row${fresh(e.ts)}"><time>${time(e.ts)}</time><div><span class="sev ${e.severity}">${e.kind === 'alert' ? cap(e.severity) : 'Change'}</span>${e.message}</div></div>`).join('')
     : '<div class="empty">No alerts yet.</div>');
 }
 
 function renderAll(s) {
   const m = s.summary, pr = s.privacy;
+  const sc = s.scenario && s.scenarios.find((x) => x.id === s.scenario);
+  setHtml('scn', sc ? `<div class="scn"><b>Scenario running:</b> ${sc.blurb}</div>` : '');
   setHtml('hero', `${ring(pr, 'big')}<div class="hmain"><h2>Device privacy score</h2><p class="hl">${pr.headline}</p>
     <p class="muted">Based on every app's trust score, open permissions that don't fit an app's purpose, and requests waiting for you.</p></div>
     <div class="auto"><button class="switch" role="switch" aria-checked="${s.autoProtect}" aria-label="Auto-protect" data-act="auto"><i></i></button>
@@ -315,9 +785,12 @@ async function refresh(force) {
   try {
     const s = await (await fetch('/api/state')).json();
     state = s; misbehaving = s.misbehaving;
-    $('btnMisbehave').textContent = misbehaving ? 'Stop misbehaving' : `Make ${s.target} misbehave`;
+    if (!$('scenarioSel').options.length) s.scenarios.forEach((x) => $('scenarioSel').add(new Option(x.label, x.id)));
+    if ($('fApp').options.length < 2) s.apps.forEach((x) => $('fApp').add(new Option(x.name, x.name)));
+    $('scenarioSel').disabled = misbehaving;
+    $('btnMisbehave').textContent = misbehaving ? 'Stop scenario' : 'Start scenario';
     $('btnMisbehave').className = misbehaving ? '' : 'danger';
-    $('live').className = 'live'; $('live').lastChild.textContent = 'Live';
+    $('live').className = 'live'; $('live').lastChild.textContent = window.__edithLocal ? 'Live (demo runs in your browser)' : 'Live';
     s.events.filter((e) => e.kind === 'alert' && e.ts > lastToast && e.severity !== 'info').reverse().forEach((e) => {
       lastToast = Math.max(lastToast, e.ts);
       const t = document.createElement('div'); t.className = 'toast ' + e.severity; t.textContent = e.message;
@@ -335,13 +808,16 @@ document.addEventListener('click', (e) => {
   const d = b.dataset;
   if (d.tab) return show(d.tab);
   if (d.act === 'perm') post('/api/permission', { appId: d.app, resource: d.res, value: d.val });
+  if (d.act === 'undo') post('/api/undo');
   if (d.act === 'auto') post('/api/autoprotect', { enabled: !state.autoProtect });
   if (d.act === 'status') post('/api/status', { appId: d.app, status: d.val });
   if (d.act === 'rec' && recMap[d.id]) post(recMap[d.id].type === 'permission' ? '/api/permission' : '/api/status', recMap[d.id]);
   if (d.act === 'select' || d.act === 'manage') { sel = d.app; if (d.act === 'manage') show('permissions'); if (state) renderAll(state); }
 });
-$('btnMisbehave').onclick = () => post('/api/simulator', { misbehaving: !misbehaving });
+$('btnMisbehave').onclick = () => post('/api/simulator', { scenario: misbehaving ? null : $('scenarioSel').value });
 $('btnReset').onclick = () => post('/api/reset');
+
+$('fApp').onchange = $('fDenied').onchange = () => state && renderLogs(state.logs);
 
 function setTheme(t) {
   document.documentElement.dataset.theme = t;
@@ -355,6 +831,96 @@ $('btnTheme').onclick = () => setTheme(document.documentElement.dataset.theme ==
 show(location.hash.slice(1));
 refresh();
 setInterval(refresh, 1000);
+/* ===== New features: paste at the end of the last script block ===== */
+
+// 1. Incident report: root cause, evidence, recommended actions and timeline
+function buildReport(s) {
+  const L = [];
+  const hit = s.apps.filter((a) => a.score < 100 || a.status === 'suspended' || a.perms.some((p) => p.status === 'pending'));
+  L.push('# E.D.I.T.H. incident report', 'Generated: ' + new Date().toLocaleString(), '');
+  L.push('## Summary', `- Device privacy score: ${s.privacy.score}/100 (${s.privacy.band})`, `- ${s.privacy.headline}`,
+    `- Accesses recorded: ${s.summary.total}, blocked: ${s.summary.blocked}`, `- Alerts raised: ${s.summary.alerts}`, '');
+  if (!hit.length) L.push('No app currently shows suspicious behavior.', '');
+  hit.forEach((a) => {
+    const labels = a.breakdown.map((b) => b.label), causes = [];
+    if (labels.includes('Unusual access frequency')) causes.push('it reads data far more often than its normal pattern');
+    if (labels.includes('Unauthorized access attempt') || labels.includes('New permission request')) causes.push('it tries to reach data it was never given');
+    if (labels.some((l) => l.startsWith('Request outside'))) causes.push("its requests do not match the app's purpose");
+    L.push(`## Affected app: ${a.name}`, `- Trust score: ${a.score}/100 (${a.band})${a.status === 'suspended' ? ', suspended' : ''}`,
+      `- What happened: ${a.summaryText}`,
+      `- Most likely root cause: ${causes.length ? causes.join('; ') : 'no active violation, the score is recovering'}.`, '- Evidence:');
+    a.breakdown.forEach((b) => L.push(`  - ${time(b.ts)}  -${b.points}  ${b.label}: ${b.detail}`));
+    const open = a.perms.filter((p) => p.status === 'pending').map((p) => p.resource);
+    if (open.length) L.push(`- Pending permission requests: ${open.join(', ')}`);
+    L.push('');
+  });
+  L.push('## Recommended actions');
+  if (s.recommendations.length) s.recommendations.forEach((r, i) => L.push(`${i + 1}. [${r.severity}] ${r.text}`));
+  else L.push('None. Every app is behaving as expected.');
+  L.push('', '## Timeline (oldest first)');
+  s.events.slice(0, 20).reverse().forEach((e) => L.push(`- ${time(e.ts)} [${e.kind === 'alert' ? e.severity : 'change'}] ${e.message}`));
+  return L.join('\n');
+}
+
+function openReport() {
+  if (!state || document.querySelector('.modal')) return;
+  const md = buildReport(state), m = document.createElement('div');
+  m.className = 'modal';
+  m.innerHTML = '<div class="sheet" role="dialog" aria-label="Incident report"><div class="shead"><h2>Incident report</h2><div class="toolbar">' +
+    '<button class="small primary" id="rpDl">Download</button><button class="small" id="rpPr">Print or save as PDF</button>' +
+    '<button class="small" id="rpX">Close</button></div></div><pre></pre></div>';
+  m.querySelector('pre').textContent = md;
+  document.body.appendChild(m);
+  m.querySelector('#rpX').onclick = () => m.remove();
+  m.onclick = (e) => { if (e.target === m) m.remove(); };
+  m.querySelector('#rpPr').onclick = () => window.print();
+  m.querySelector('#rpDl').onclick = () => {
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([md], { type: 'text/markdown' }));
+    a.download = 'edith-incident-report.md'; a.click();
+  };
+}
+
+
+const rb = document.createElement('button');
+rb.id = 'btnReport'; rb.className = 'primary'; rb.textContent = 'Generate incident report'; rb.onclick = openReport;
+document.querySelector('header').appendChild(rb);
+
+const demo = document.querySelector('.demo'), liveEl = demo.querySelector('.live');
+const pb = document.createElement('button'); pb.textContent = 'Presentation mode: off';
+pb.onclick = () => { pb.textContent = 'Presentation mode: ' + (document.body.classList.toggle('present') ? 'on' : 'off'); };
+const sb = document.createElement('button'); sb.textContent = 'Alert sound: off';
+let sound = false, lastBeep = Date.now();
+function beep() {
+  try {
+    const c = beep.c || (beep.c = new (window.AudioContext || window.webkitAudioContext)());
+    const o = c.createOscillator(), g = c.createGain();
+    o.frequency.value = 880; g.gain.value = 0.08; o.connect(g); g.connect(c.destination);
+    o.start(); o.stop(c.currentTime + 0.18);
+  } catch (e) {}
+}
+sb.onclick = () => { sound = !sound; sb.textContent = 'Alert sound: ' + (sound ? 'on' : 'off'); if (sound) beep(); };
+const hint = document.createElement('p'); hint.textContent = 'Keys: 1 2 3 tabs, S scenario, T theme, R report';
+demo.insertBefore(pb, liveEl); demo.insertBefore(sb, liveEl); demo.insertBefore(hint, liveEl);
+
+setInterval(() => {            // beep when a new high-severity alert arrives
+  if (!sound || !state) return;
+  const fresh = state.events.filter((e) => e.kind === 'alert' && e.severity === 'high' && e.ts > lastBeep);
+  if (fresh.length) { lastBeep = Math.max(...fresh.map((e) => e.ts)); beep(); }
+}, 1000);
+
+// 3. Keyboard shortcuts
+document.addEventListener('keydown', (e) => {
+  if (e.ctrlKey || e.metaKey || e.altKey || e.target.matches('input,select,textarea')) return;
+  const k = e.key.toLowerCase();
+  if (k === 'escape') { const m = document.querySelector('.modal'); if (m) m.remove(); }
+  else if (k === '1') show('overview');
+  else if (k === '2') show('permissions');
+  else if (k === '3') show('activity');
+  else if (k === 's') $('btnMisbehave').click();
+  else if (k === 't') $('btnTheme').click();
+  else if (k === 'r') openReport();
+});
 </script>
 </body>
 </html>
